@@ -1,7 +1,7 @@
 {
   "name": "gripora-blackbox",
   "displayName": "Gripora Blackbox",
-  "description": "Crossplatform blackbox analytics tool for Gripora flight control system.",
+  "description": "Log viewer and analyzer for Gripora, open-source stability control for RC cars.",
   "version": "0.0.0",
   "main": "index.html",
   "node-remote": "http://localhost:*",

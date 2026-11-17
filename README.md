@@ -14,8 +14,7 @@ firmware for fixed-wing aircraft.
 
 **[Open in the browser](https://blackbox.gripora.org)** ·
 **[Desktop downloads](https://github.com/gripora-project/gripora-blackbox/releases)** ·
-**[Documentation](https://doc.gripora.org)** ·
-**[Discord](https://discord.gg/aEyyAJTXRw)**
+**[Documentation](https://doc.gripora.org)**
 
 ![A flight log in the Blackbox Explorer](https://raw.githubusercontent.com/gripora-project/gripora-docs/main/docs/assets/images/blackbox-viewer.png)
 
@@ -85,7 +84,6 @@ See [HOWTO.md](HOWTO.md) for running from source and building, and
 Gripora is a community project. You can help by:
 
 * testing new versions and [reporting bugs](https://github.com/gripora-project/gripora-blackbox/issues)
-* helping other pilots on [Discord](https://discord.gg/aEyyAJTXRw)
 * fixing bugs and adding features
 
 

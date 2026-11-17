@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Gripora Blackbox
-Comment=Cross-platform blackbox analytics tool for Gripora flight control system
+Comment=Log viewer and analyzer for Gripora, stability control for RC cars
 Exec=/opt/gripora/gripora-blackbox/gripora-blackbox
 Icon=/opt/gripora/gripora-blackbox/icon/wf_icon_128.png
 Terminal=false

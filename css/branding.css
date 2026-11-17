@@ -2,13 +2,13 @@
  * Gripora branding: welcome screen and app chrome.
  *
  * Colours follow the landing page (www.gripora.org) and the configurator (cfg.gripora.org):
- * Gripora red on dark blue-grey neutrals, heavy headings and uppercase letter-spaced labels.
+ * Gripora orange on dark blue-grey neutrals, heavy headings and uppercase letter-spaced labels.
  */
 
 :root {
-    --wf-red: #d40000;
-    --wf-red-hover: #a40000;
-    --wf-red-bright: #ff4d4d;
+    --wf-red: #ff5f1f;
+    --wf-red-hover: #c2410c;
+    --wf-red-bright: #ff8a57;
     --wf-chrome-bg: hsl(220, 9%, 13%);
     --wf-chrome-bg-raised: hsl(220, 9%, 18%);
     --wf-chrome-bg-sunken: hsl(220, 10%, 9%);
@@ -227,7 +227,7 @@ html:not(.has-log):not(.has-video) body {
     font-family: var(--wf-font);
     color: var(--wf-text-secondary);
     background:
-        radial-gradient(circle at 85% -10%, rgba(212, 0, 0, 0.22) 0%, transparent 45%),
+        radial-gradient(circle at 85% -10%, rgba(255, 95, 31, 0.22) 0%, transparent 45%),
         radial-gradient(circle at 0% 110%, rgba(255, 255, 255, 0.06) 0%, transparent 40%),
         linear-gradient(160deg, var(--wf-chrome-bg) 0%, var(--wf-chrome-bg-sunken) 100%);
 }
@@ -391,7 +391,7 @@ html:not(.has-log):not(.has-video) body {
 
 html.is-dragging .wf-dropzone {
     border-color: var(--wf-red-bright);
-    background: rgba(212, 0, 0, 0.12);
+    background: rgba(255, 95, 31, 0.12);
     transform: scale(1.02);
 }
 
@@ -427,7 +427,7 @@ html.is-dragging .wf-dropzone {
     font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
-    box-shadow: 0 10px 30px rgba(212, 0, 0, 0.3);
+    box-shadow: 0 10px 30px rgba(255, 95, 31, 0.3);
     transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -436,7 +436,7 @@ html.is-dragging .wf-dropzone {
     background: var(--wf-red-hover);
     color: #fff;
     transform: translateY(-2px);
-    box-shadow: 0 14px 36px rgba(212, 0, 0, 0.4);
+    box-shadow: 0 14px 36px rgba(255, 95, 31, 0.4);
 }
 
 .wf-dropzone .loading-message {
@@ -504,7 +504,7 @@ a.wf-card:hover {
     height: 40px;
     margin-bottom: 14px;
     border-radius: 10px;
-    background: rgba(212, 0, 0, 0.15);
+    background: rgba(255, 95, 31, 0.15);
     color: var(--wf-red-bright);
 }
 
