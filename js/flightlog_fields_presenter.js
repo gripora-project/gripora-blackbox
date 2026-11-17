@@ -717,7 +717,7 @@ function FlightLogFieldPresenter() {
             'debug[5]':'Last Recapture Axis',
             'debug[6]':'Tracking Axes',
         },
-        // Wingflight throttle (TPA) and GPS speed (SPA) gain attenuation
+        // Gripora throttle (TPA) and GPS speed (SPA) gain attenuation
         'GAIN_ATTEN' : {
             'debug[all]':'Gain Attenuation',
             'debug[0]':'TPA Scale',
@@ -726,7 +726,7 @@ function FlightLogFieldPresenter() {
             'debug[3]':'GPS Speed (raw)',
             'debug[4]':'GPS Fix',
         },
-        // Wingflight snap relax: roll/pitch feedback relaxed against a pop top, pinwheel or snap
+        // Gripora snap relax: roll/pitch feedback relaxed against a pop top, pinwheel or snap
         'SNAP_RELAX' : {
             'debug[all]':'Snap Relax',
             'debug[0]':'Relax',
@@ -736,7 +736,7 @@ function FlightLogFieldPresenter() {
             'debug[4]':'Pitch Stick',
             'debug[5]':'Yaw Stick',
         },
-        // Wingflight prop-hang relax: roll I held back in a prop hang so the prop torque can roll the airframe
+        // Gripora prop-hang relax: roll I held back in a prop hang so the prop torque can roll the airframe
         'PROP_HANG' : {
             'debug[all]':'Prop-Hang Relax',
             'debug[0]':'Roll I Relax',
@@ -755,8 +755,8 @@ function FlightLogFieldPresenter() {
         DEBUG_FRIENDLY_FIELD_NAMES = {...DEBUG_FRIENDLY_FIELD_NAMES_INITIAL};
 
         // I-term Relax is a generic PID anti-windup technique, not heli-specific,
-        // and is still present in wingflight-firmware -- applies to both.
-        if (firmwareType === FIRMWARE_TYPE_ROTORFLIGHT || firmwareType === FIRMWARE_TYPE_WINGFLIGHT) {
+        // and is still present in gripora-firmware -- applies to both.
+        if (firmwareType === FIRMWARE_TYPE_ROTORFLIGHT || firmwareType === FIRMWARE_TYPE_GRIPORA) {
            if (semver.gte(firmwareVersion, '4.3.0')) {
                 DEBUG_FRIENDLY_FIELD_NAMES.ITERM_RELAX = {
                     'debug[all]':'I-term Relax',
@@ -1297,7 +1297,7 @@ function FlightLogFieldPresenter() {
                     }
                     break;
                 case 'ITERM_RELAX':
-                    if ((flightLog.getSysConfig().firmwareType === FIRMWARE_TYPE_ROTORFLIGHT || flightLog.getSysConfig().firmwareType === FIRMWARE_TYPE_WINGFLIGHT) && semver.gte(flightLog.getSysConfig().firmwareVersion, '4.3.0')) {
+                    if ((flightLog.getSysConfig().firmwareType === FIRMWARE_TYPE_ROTORFLIGHT || flightLog.getSysConfig().firmwareType === FIRMWARE_TYPE_GRIPORA) && semver.gte(flightLog.getSysConfig().firmwareVersion, '4.3.0')) {
                         switch (fieldName) {
 	                           case 'debug[0]': // setpoint
 	                           case 'debug[1]': // Gyro Rate

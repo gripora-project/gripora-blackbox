@@ -752,7 +752,7 @@ function BlackboxLogViewer() {
             currentOffsetCache.log      = file.name; // store the name of the loaded log file
             currentOffsetCache.index    = null;      // and clear the index
 
-            document.title = file.name + ' - WingFlight Blackbox';
+            document.title = file.name + ' - Gripora Blackbox';
 
             hasLog = true; html.toggleClass("has-log", hasLog);
             html.toggleClass("has-table", hasTable);
@@ -1073,7 +1073,7 @@ function BlackboxLogViewer() {
         $("#viewer-version").text('Blackbox Explorer v' + VIEWER_VERSION);
         $(".viewer-version", statusBar).text('v'+VIEWER_VERSION);
         try {
-            $.getJSON('https://api.github.com/repos/WingFlight/wingflight-blackbox/releases/latest',{},function(data){
+            $.getJSON('https://api.github.com/repos/gripora-project/gripora-blackbox/releases/latest',{},function(data){
                 latestVersion = data;
                 if(latestVersion) {
                     $(".btn-viewer-download").text(latestVersion.tag_name);
@@ -2317,7 +2317,7 @@ function BlackboxLogViewer() {
         // its CLI dump, as linked by the "Open in Blackbox Explorer" button of the
         // log sharing sites. Only those sites (and a local test server) are
         // accepted; they allow the download with CORS.
-        const SHARED_LOG_HOSTS = ['logs.rotorflight.org', 'logs.wingflight.org'];
+        const SHARED_LOG_HOSTS = ['logs.rotorflight.org', 'logs.gripora.org'];
 
         function sharedLogUrl(value) {
             let url;

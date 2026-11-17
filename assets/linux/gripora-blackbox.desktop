@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Gripora Blackbox
+Comment=Cross-platform blackbox analytics tool for Gripora flight control system
+Exec=/opt/gripora/gripora-blackbox/gripora-blackbox
+Icon=/opt/gripora/gripora-blackbox/icon/wf_icon_128.png
+Terminal=false
+Type=Application
+MimeType=application/x-blackboxlog

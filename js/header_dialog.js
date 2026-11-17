@@ -283,7 +283,7 @@ function HeaderDialog(dialog, onSave) {
             });
         }
 
-        // Wingflight gain curve scale at |stick deflection| x (0..1000), like the
+        // Gripora gain curve scale at |stick deflection| x (0..1000), like the
         // firmware's pidEvaluateGainCurve(): 1.0 without a curve.
         function gainCurveScale(curves, index, x) {
             var curve = index > 0 && curves ? curves[index - 1] : null;
@@ -305,7 +305,7 @@ function HeaderDialog(dialog, onSave) {
             return String(Math.round(value * 100) / 100);
         }
 
-        // Effective gains at centre stick for each loop, from the Wingflight master_gain,
+        // Effective gains at centre stick for each loop, from the Gripora master_gain,
         // gain_curve and gain_curve_N headers. Matches flight/pid.c and flight/tv_pid.c:
         // the main loop's master gain scales P, I and D, the thrust vector loop's scales
         // P, I, D and F; B is never scaled by it.
@@ -475,7 +475,7 @@ function HeaderDialog(dialog, onSave) {
             {name: 'Temperatures', description: 'Temperatures'},
         ];
 
-        if((sysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT || sysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT) && semver.gte(sysConfig.firmwareVersion, '4.4.0')) {
+        if((sysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT || sysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA) && semver.gte(sysConfig.firmwareVersion, '4.4.0')) {
             fields = [...fields, ...[
                 {name: 'ESC', description: 'ESC Telemetry'},
                 {name: 'BEC', description: 'BEC Telemetry'},
@@ -705,7 +705,7 @@ function HeaderDialog(dialog, onSave) {
 
                 switch(sysConfig.firmwareType) {
                         case FIRMWARE_TYPE_ROTORFLIGHT:
-                        case FIRMWARE_TYPE_WINGFLIGHT:
+                        case FIRMWARE_TYPE_GRIPORA:
                         case FIRMWARE_TYPE_BETAFLIGHT:
                         case FIRMWARE_TYPE_CLEANFLIGHT:
                                 $('.header-dialog-toggle').hide(); // selection button is not required
@@ -743,9 +743,9 @@ function HeaderDialog(dialog, onSave) {
                         PID_CONTROLLER_TYPE = ([
                                         'ROTORFLIGHT',
                                 ]);
-                } else if (sysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT) {
+                } else if (sysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA) {
                         PID_CONTROLLER_TYPE = ([
-                                        'WINGFLIGHT',
+                                        'GRIPORA',
                                 ]);
                 } else {
                         PID_CONTROLLER_TYPE = ([
@@ -768,7 +768,7 @@ function HeaderDialog(dialog, onSave) {
         populatePID('yawPID'                                        , sysConfig.yawPID);
         populatePID('govPID'                                        , sysConfig.govPID);
 
-        // Wingflight thrust vector loop, only in logs that carry its tune
+        // Gripora thrust vector loop, only in logs that carry its tune
         $('#pid_tv_header, #pid_tv').toggle(Array.isArray(sysConfig.tvRollPID));
         populatePID('tvRollPID'                     , sysConfig.tvRollPID);
         populatePID('tvPitchPID'                    , sysConfig.tvPitchPID);
@@ -854,7 +854,7 @@ function HeaderDialog(dialog, onSave) {
         setParameter('yaw_deadband'                                ,sysConfig.yaw_deadband,0);
 
         if ((activeSysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT) ||
-            (activeSysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT) ||
+            (activeSysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA) ||
             (activeSysConfig.firmwareType == FIRMWARE_TYPE_BETAFLIGHT  && semver.gte(activeSysConfig.firmwareVersion, '3.4.0'))) {
             renderSelect('gyro_hardware_lpf'       ,sysConfig.gyro_lpf, GYRO_HARDWARE_LPF);
 
@@ -890,7 +890,7 @@ function HeaderDialog(dialog, onSave) {
                 setParameter('gyro_lowpass2_hz'         ,sysConfig.gyro_lowpass2_hz,0);
 
         if ((activeSysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT) ||
-            (activeSysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT) ||
+            (activeSysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA) ||
             (activeSysConfig.firmwareType == FIRMWARE_TYPE_BETAFLIGHT  && semver.gte(activeSysConfig.firmwareVersion, '4.3.0'))) {
             setParameter('dynNotchCount'           ,sysConfig.dyn_notch_count        , 0);
         } else {
@@ -961,7 +961,7 @@ function HeaderDialog(dialog, onSave) {
 
         // rate_limits
         if ((activeSysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT) ||
-            (activeSysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT) ||
+            (activeSysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA) ||
             (activeSysConfig.firmwareType == FIRMWARE_TYPE_BETAFLIGHT  && semver.gte(activeSysConfig.firmwareVersion, '4.0.0'))) {
             setParameter('rate_limits_roll'  , sysConfig.rate_limits[0], 0);
             setParameter('rate_limits_pitch' , sysConfig.rate_limits[1], 0);
@@ -972,12 +972,12 @@ function HeaderDialog(dialog, onSave) {
         }
 
         renderSelect('iterm_relax_type', sysConfig.iterm_relax_type, ITERM_RELAX_TYPE);
-        // Wingflight API 22.8+ logs the relax level instead of a type (relax is
+        // Gripora API 22.8+ logs the relax level instead of a type (relax is
         // always on for every axis), so hide the type box rather than show it missing.
         if (sysConfig.iterm_relax_type == null && sysConfig.iterm_relax_level[0] != null) {
             $('.parameter td[name="iterm_relax_type"]').css('display', 'none');
         }
-        // Wingflight API 22.9+ logs the I-term Relax score (1-10, higher =
+        // Gripora API 22.9+ logs the I-term Relax score (1-10, higher =
         // more relax, less bounce-back) instead of the relax cutoff in Hz; the
         // header is iterm_relax, or bounceback on early 22.9 builds.
         var relaxScore = (sysConfig.iterm_relax && sysConfig.iterm_relax[0] != null) ? sysConfig.iterm_relax
@@ -992,7 +992,7 @@ function HeaderDialog(dialog, onSave) {
         setParameter('iterm_relax_level_y', sysConfig.iterm_relax_level[2], 0);
 
         // iterm_decay is "roll,pitch,yaw,max rate" with the times in 0.01 s on
-        // Wingflight API 22.7+, and "time,max rate" with one time in 0.1 s for
+        // Gripora API 22.7+, and "time,max rate" with one time in 0.1 s for
         // every axis before that.
         var itermDecay = sysConfig.iterm_decay || [];
         if (itermDecay.length >= 4) {
@@ -1120,7 +1120,7 @@ function HeaderDialog(dialog, onSave) {
 
         // Dynamic filters of Betaflight 4.0
         if((activeSysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT ||
-           activeSysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT ||
+           activeSysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA ||
            activeSysConfig.firmwareType == FIRMWARE_TYPE_BETAFLIGHT && semver.gte(activeSysConfig.firmwareVersion, '4.0.0')) &&
                 (sysConfig.gyro_lowpass_dyn_hz[0] != null) && (sysConfig.gyro_lowpass_dyn_hz[0] > 0) &&
                 (sysConfig.gyro_lowpass_dyn_hz[1] > sysConfig.gyro_lowpass_dyn_hz[0])) {
@@ -1174,7 +1174,7 @@ function HeaderDialog(dialog, onSave) {
         }
 
         /* Selected Fields */
-        if(activeSysConfig.firmwareType === FIRMWARE_TYPE_BETAFLIGHT && semver.gte(activeSysConfig.firmwareVersion, '4.3.0') || activeSysConfig.firmwareType === FIRMWARE_TYPE_ROTORFLIGHT || activeSysConfig.firmwareType === FIRMWARE_TYPE_WINGFLIGHT) {
+        if(activeSysConfig.firmwareType === FIRMWARE_TYPE_BETAFLIGHT && semver.gte(activeSysConfig.firmwareVersion, '4.3.0') || activeSysConfig.firmwareType === FIRMWARE_TYPE_ROTORFLIGHT || activeSysConfig.firmwareType === FIRMWARE_TYPE_GRIPORA) {
             builtSelectedFieldsList(sysConfig);
             $(".disabled_fields").css("display","table-header-group");
         } else {

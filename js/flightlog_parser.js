@@ -8,7 +8,7 @@ var FlightLogIndex,
     FIRMWARE_TYPE_BETAFLIGHT = 3,
     FIRMWARE_TYPE_INAV = 4,
     FIRMWARE_TYPE_ROTORFLIGHT = 5,
-    FIRMWARE_TYPE_WINGFLIGHT = 6;
+    FIRMWARE_TYPE_GRIPORA = 6;
 
 var FlightLogParser = function(logData) {
     //Private constants:
@@ -315,7 +315,7 @@ var FlightLogParser = function(logData) {
             posrPID:[null, null, null],             // Position Rate [P, I, D]
             navrPID:[null, null, null],             // Nav Rate      [P, I, D]
             levelPID:[null, null, null],            // Angle Mode    [strength, limit, damping]
-            // Wingflight gain scaling and thrust vector tune. null when the log doesn't have them.
+            // Gripora gain scaling and thrust vector tune. null when the log doesn't have them.
             master_gain:null,                       // Master gain [ROLL, PITCH, YAW], percent
             gain_curve:null,                        // Master gain curve [ROLL, PITCH, YAW], 0 = none, else 1..8
             tvRollPID:null,                         // Thrust vector Roll  [P, I, D, F, B]
@@ -402,11 +402,11 @@ var FlightLogParser = function(logData) {
             filter_process_denom : null,            // Filter denom
             iterm_relax_type: null,                 // ITerm Relax type
             iterm_relax_cutoff: [null, null, null], // ITerm Relax cutoff
-            iterm_relax_level: [null, null, null],  // ITerm Relax level (Wingflight, replaces the type)
-            iterm_relax: [null, null, null],        // I-term Relax score 1-10 (Wingflight 22.9+, replaces iterm_relax_cutoff)
+            iterm_relax_level: [null, null, null],  // ITerm Relax level (Gripora, replaces the type)
+            iterm_relax: [null, null, null],        // I-term Relax score 1-10 (Gripora 22.9+, replaces iterm_relax_cutoff)
             bounceback: [null, null, null],         // Same score, as early 22.9 builds named the header
             error_limit: [null, null, null],        // Error Limit
-            iterm_decay: [null, null],              // I-term Decay: time, max rate (Wingflight 22.7+: roll, pitch, yaw time in 0.01 s, then max rate)
+            iterm_decay: [null, null],              // I-term Decay: time, max rate (Gripora 22.7+: roll, pitch, yaw time in 0.01 s, then max rate)
             error_decay_ground: null,               // Ground Error Decay
             cyclic_coupling: [null, null, null],          // Cyclic Cross-Coupling
             dyn_notch_range: null,                  // Dyn Notch Range (LOW, MED, HIGH or AUTO)
@@ -710,8 +710,10 @@ var FlightLogParser = function(logData) {
                         $('html').removeClass('isWF');
                         $('html').addClass('isRF');
                     break;
+                    // Gripora, and logs from before the rename (Wingflight), are the same firmware family
+                    case "Gripora":
                     case "Wingflight":
-                        that.sysConfig.firmwareType = FIRMWARE_TYPE_WINGFLIGHT;
+                        that.sysConfig.firmwareType = FIRMWARE_TYPE_GRIPORA;
                         $('html').removeClass('isBaseF');
                         $('html').removeClass('isCF');
                         $('html').removeClass('isBF');
@@ -891,7 +893,7 @@ var FlightLogParser = function(logData) {
             case "yawRateAccelLimit":
             case "rateAccelLimit":
                 if((that.sysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT) ||
-                   (that.sysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT) ||
+                   (that.sysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA) ||
                    (that.sysConfig.firmwareType == FIRMWARE_TYPE_BETAFLIGHT  && semver.gte(that.sysConfig.firmwareVersion, '3.1.0')) ||
                    (that.sysConfig.firmwareType == FIRMWARE_TYPE_CLEANFLIGHT && semver.gte(that.sysConfig.firmwareVersion, '2.0.0'))) {
                     that.sysConfig[fieldName] = parseInt(fieldValue, 10)/1000;
@@ -908,7 +910,7 @@ var FlightLogParser = function(logData) {
             case "dterm_lpf_hz":
             case "dterm_lpf2_hz":
                    if((that.sysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT) ||
-                      (that.sysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT) ||
+                      (that.sysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA) ||
                       (that.sysConfig.firmwareType == FIRMWARE_TYPE_BETAFLIGHT  && semver.gte(that.sysConfig.firmwareVersion, '3.0.1')) ||
                       (that.sysConfig.firmwareType == FIRMWARE_TYPE_CLEANFLIGHT && semver.gte(that.sysConfig.firmwareVersion, '2.0.0'))) {
                     that.sysConfig[fieldName] = parseInt(fieldValue, 10);
@@ -920,7 +922,7 @@ var FlightLogParser = function(logData) {
             case "gyro_notch_hz":
             case "gyro_notch_cutoff":
                 if((that.sysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT) ||
-                   (that.sysConfig.firmwareType == FIRMWARE_TYPE_WINGFLIGHT) ||
+                   (that.sysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA) ||
                    (that.sysConfig.firmwareType == FIRMWARE_TYPE_BETAFLIGHT  && semver.gte(that.sysConfig.firmwareVersion, '3.0.1')) ||
                    (that.sysConfig.firmwareType == FIRMWARE_TYPE_CLEANFLIGHT && semver.gte(that.sysConfig.firmwareVersion, '2.0.0'))) {
                     that.sysConfig[fieldName] = parseCommaSeparatedString(fieldValue);
@@ -1019,7 +1021,7 @@ var FlightLogParser = function(logData) {
                 // max_pitch_angle, bearing_kp, altitude_kp, altitude_kd, throttle, turn_coordination
                     that.sysConfig[fieldName] = parseCommaSeparatedString(fieldValue);
             break;
-            // Wingflight gain curve: point count, then x,y for each point slot
+            // Gripora gain curve: point count, then x,y for each point slot
             case "gain_curve_1":
             case "gain_curve_2":
             case "gain_curve_3":
@@ -1053,7 +1055,7 @@ var FlightLogParser = function(logData) {
                 that.sysConfig["yawPID"].push(ffValues[2]);
             break;
             case "level_damping":
-                // Wingflight 22.13+: Angle mode damping, shown as the third LEVEL value
+                // Gripora 22.13+: Angle mode damping, shown as the third LEVEL value
                 that.sysConfig.levelPID[2] = parseInt(fieldValue, 10);
             break;
             /* End of CSV packed values */
@@ -1080,8 +1082,8 @@ var FlightLogParser = function(logData) {
 
                 //TODO Unify this somehow...
 
-                // Extract the firmware revision in case of Rotorflight/Betaflight/Raceflight/Cleanfligh 2.x/Other
-                matches = fieldValue.match(/(.*flight).* (\d+)\.(\d+)(\.(\d+))*/i);
+                // Extract the firmware revision in case of Gripora/Rotorflight/Betaflight/Raceflight/Cleanfligh 2.x/Other
+                matches = fieldValue.match(/(gripora|.*flight).*(\d+)\.(\d+)(\.(\d+))*/i);
                 if(matches!=null) {
 
                     // Detecting requires looking at the revision string
@@ -1102,8 +1104,8 @@ var FlightLogParser = function(logData) {
                         $('html').removeClass('isWF');
                         $('html').removeClass('isINAV');
                     }
-                    else if (matches[1].toLowerCase() === "wingflight") {
-                        that.sysConfig.firmwareType = FIRMWARE_TYPE_WINGFLIGHT;
+                    else if (matches[1].toLowerCase() === "gripora" || matches[1].toLowerCase() === "wingflight") {
+                        that.sysConfig.firmwareType = FIRMWARE_TYPE_GRIPORA;
                         $('html').removeClass('isBaseF');
                         $('html').removeClass('isCF');
                         $('html').removeClass('isBF');

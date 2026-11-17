@@ -1,23 +1,23 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/WingFlight/wingflight-landing-page/master/logos/wf_logo_dark_white.svg">
-    <img src="https://raw.githubusercontent.com/WingFlight/wingflight-landing-page/master/logos/wf_logo_dark.svg" alt="Wingflight" width="420">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/gripora-project/gripora-website/master/branding/gripora_logo_white.svg">
+    <img src="https://raw.githubusercontent.com/gripora-project/gripora-website/master/branding/gripora_logo_dark.svg" alt="Gripora" width="420">
   </picture>
 </p>
 
-# Wingflight Blackbox Explorer
+# Gripora Blackbox Explorer
 
-The Blackbox Explorer opens the flight logs a [Wingflight](https://github.com/WingFlight/wingflight-firmware)
+The Blackbox Explorer opens the flight logs a [Gripora](https://github.com/gripora-project/gripora-firmware)
 flight controller records, and plots them: gyro against setpoint, servo and motor outputs, flight
-modes, battery and anything else that was logged. Wingflight is open-source flight controller
+modes, battery and anything else that was logged. Gripora is open-source flight controller
 firmware for fixed-wing aircraft.
 
-**[Open in the browser](https://blackbox.wingflight.org)** ·
-**[Desktop downloads](https://github.com/WingFlight/wingflight-blackbox/releases)** ·
-**[Documentation](https://doc.wingflight.org)** ·
+**[Open in the browser](https://blackbox.gripora.org)** ·
+**[Desktop downloads](https://github.com/gripora-project/gripora-blackbox/releases)** ·
+**[Documentation](https://doc.gripora.org)** ·
 **[Discord](https://discord.gg/aEyyAJTXRw)**
 
-![A flight log in the Blackbox Explorer](https://raw.githubusercontent.com/WingFlight/wingflight-docs/main/docs/assets/images/blackbox-viewer.png)
+![A flight log in the Blackbox Explorer](https://raw.githubusercontent.com/gripora-project/gripora-docs/main/docs/assets/images/blackbox-viewer.png)
 
 
 ## Features
@@ -31,13 +31,13 @@ firmware for fixed-wing aircraft.
 * Saved workspaces for the graph layouts you use most
 
 Logging itself is set up in the Configurator's
-[Blackbox tab](https://doc.wingflight.org/configurator/tabs/blackbox/).
+[Blackbox tab](https://doc.gripora.org/configurator/tabs/blackbox/).
 
 
 ## Installation
 
-Use it in the browser at [blackbox.wingflight.org](https://blackbox.wingflight.org), or download the
-desktop app from the [releases page](https://github.com/WingFlight/wingflight-blackbox/releases).
+Use it in the browser at [blackbox.gripora.org](https://blackbox.gripora.org), or download the
+desktop app from the [releases page](https://github.com/gripora-project/gripora-blackbox/releases).
 The desktop app needs Windows 10 or later, macOS or Linux.
 
 
@@ -82,16 +82,16 @@ See [HOWTO.md](HOWTO.md) for running from source and building, and
 
 ## Contributing
 
-Wingflight is a community project. You can help by:
+Gripora is a community project. You can help by:
 
-* testing new versions and [reporting bugs](https://github.com/WingFlight/wingflight-blackbox/issues)
+* testing new versions and [reporting bugs](https://github.com/gripora-project/gripora-blackbox/issues)
 * helping other pilots on [Discord](https://discord.gg/aEyyAJTXRw)
 * fixing bugs and adding features
 
 
 ## Origins
 
-Wingflight is open source and free of charge, with no warranty.
+Gripora is open source and free of charge, with no warranty.
 
 The Blackbox Explorer is a fork of the [Rotorflight](https://github.com/rotorflight) Blackbox
 Explorer, which is a fork of the [Betaflight](https://github.com/betaflight) Blackbox Explorer,

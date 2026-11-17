@@ -1,5 +1,5 @@
 ; ------------------------------------------
-; Installer for WingFlight Blackbox Viewer
+; Installer for Gripora Blackbox Viewer
 ; ------------------------------------------
 ; It receives from the command line with /D the parameters:
 ; version
@@ -9,15 +9,15 @@
 ; sourceFolder
 ; targetFolder
 
-#define ApplicationName "WingFlight Blackbox"
-#define CompanyName "The WingFlight open source project"
-#define CompanyUrl "https://github.com/WingFlight"
-#define ExecutableFileName "wingflight-blackbox.exe"
-#define GroupName "WingFlight"
-#define InstallerFileName "wingflight-blackbox-installer_" + version + "_" + archName
-#define SourcePath "..\..\" + sourceFolder + "\wingflight-blackbox\" + archName
-#define TargetFolderName "WingFlight-Blackbox"
-#define UpdatesUrl "https://github.com/WingFlight/wingflight-blackbox/releases/"
+#define ApplicationName "Gripora Blackbox"
+#define CompanyName "The Gripora open source project"
+#define CompanyUrl "https://github.com/gripora-project"
+#define ExecutableFileName "gripora-blackbox.exe"
+#define GroupName "Gripora"
+#define InstallerFileName "gripora-blackbox-installer_" + version + "_" + archName
+#define SourcePath "..\..\" + sourceFolder + "\gripora-blackbox\" + archName
+#define TargetFolderName "Gripora-Blackbox"
+#define UpdatesUrl "https://github.com/gripora-project/gripora-blackbox/releases/"
 
 [CustomMessages]
 LaunchProgram=Start %1

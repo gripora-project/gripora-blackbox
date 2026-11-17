@@ -12,7 +12,7 @@ import { defineConfig } from "vite";
 // <script src> tags and node_modules-relative references aren't part of that graph, so a
 // build today would emit an index.html missing most of its scripts. Making `vite build`
 // produce a deployable bundle is the "web" phase, and will need the kind of asset-copying
-// plugins wingflight-configurator's vite.config.mjs uses for its own legacy scripts.
+// plugins gripora-configurator's vite.config.mjs uses for its own legacy scripts.
 export default defineConfig({
     server: {
         port: 8080,

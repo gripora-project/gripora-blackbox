@@ -48,7 +48,7 @@ export default [
 
       // TODO: This codebase is 41 global-scope <script> files (no import/export -- see
       // vite.config.mjs's own notes on this), so nearly everything is a cross-file global by
-      // design, same situation wingflight-configurator's own eslint.config.mjs already
+      // design, same situation gripora-configurator's own eslint.config.mjs already
       // disables this for. Revisit once/if the ES modules conversion mentioned there happens.
       "no-undef": "off",
     },

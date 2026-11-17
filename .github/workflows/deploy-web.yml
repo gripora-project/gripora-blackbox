@@ -224,10 +224,10 @@ jobs:
         run: |
           DEPLOY_PATH="${{ steps.path.outputs.deploy_path }}"
 
-          echo "Deployment index: https://blackbox.wingflight.org/"
-          echo "Deployment: https://blackbox.wingflight.org/$DEPLOY_PATH/"
+          echo "Deployment index: https://blackbox.gripora.org/"
+          echo "Deployment: https://blackbox.gripora.org/$DEPLOY_PATH/"
           if [ "${{ steps.path.outputs.update_latest }}" = "true" ]; then
-            echo "Latest stable: https://blackbox.wingflight.org/latest/"
+            echo "Latest stable: https://blackbox.gripora.org/latest/"
           fi
 
       - name: Create/update GitHub Release notes
@@ -241,11 +241,11 @@ jobs:
           VERSION="${TAG##*/}"
 
           if [[ "$TAG" == release/* ]]; then
-            TITLE="WingFlight Blackbox Release $VERSION"
+            TITLE="Gripora Blackbox Release $VERSION"
             PRERELEASE_ARGS=()
             PRERELEASE=false
           else
-            TITLE="WingFlight Blackbox Snapshot $VERSION"
+            TITLE="Gripora Blackbox Snapshot $VERSION"
             PRERELEASE_ARGS=(--prerelease)
             PRERELEASE=true
           fi
@@ -258,7 +258,7 @@ jobs:
             echo
             echo "---"
             echo
-            echo "🔗 Try this build: https://blackbox.wingflight.org/$DEPLOY_PATH/"
+            echo "🔗 Try this build: https://blackbox.gripora.org/$DEPLOY_PATH/"
           } >> Notes.md
 
           if gh release view "$TAG" >/dev/null 2>&1; then

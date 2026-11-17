@@ -7,7 +7,7 @@ $(document).ready(function () {
 });
 
 function checkForBlackboxUpdates() {
-    var releaseChecker = new ReleaseChecker('blackbox', 'https://api.github.com/repos/WingFlight/wingflight-blackbox/releases');
+    var releaseChecker = new ReleaseChecker('blackbox', 'https://api.github.com/repos/gripora-project/gripora-blackbox/releases');
 
     releaseChecker.loadReleaseData(notifyOutdatedVersion);
 }

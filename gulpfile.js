@@ -111,13 +111,13 @@ const APP_ASSET_SOURCES = [
 // Must match vite.config.mjs's server.port.
 const VITE_DEV_SERVER_URL = 'http://localhost:8080/';
 
-const LINUX_INSTALL_DIR = '/opt/wingflight';
+const LINUX_INSTALL_DIR = '/opt/gripora';
 
 var nwBuilderOptions = {
     version: '0.62.2',
     files: './dist/**/*',
     macIcns: './images/wf_icon.icns',
-    macPlist: { 'CFBundleDisplayName': 'WingFlight Blackbox'},
+    macPlist: { 'CFBundleDisplayName': 'Gripora Blackbox'},
     winIco: './images/wf_icon.ico',
     downloadUrl: 'https://dl.node-webkit.org/',
 };
@@ -164,7 +164,7 @@ gulp.task('debug', debugBuild);
 // Launches the real NW.js desktop shell pointed at the Vite dev server (`yarn dev` /
 // `make dev-server`) instead of a packaged dist/debug copy, so source changes just need a
 // save + reload in the running window -- no rebuild each time. Requires the dev server to
-// already be running. Mirrors wingflight-configurator's `dev_client` gulp task.
+// already be running. Mirrors gripora-configurator's `dev_client` gulp task.
 const devClientBuild = gulp.series(dev_client_manifest, run_dev_client);
 gulp.task('dev-client', devClientBuild);
 
@@ -618,7 +618,7 @@ function release_zip(arch, appDirectory) {
     const output = getReleaseFilename(arch, 'zip');
     const base = path.join(appDirectory, pkg.name, arch);
 
-    return compressFiles(src, base, output, 'WingFlight Blackbox');
+    return compressFiles(src, base, output, 'Gripora Blackbox');
 }
 
 // Compress files from srcPath, using basePath, to outputFile in the RELEASE_DIR
@@ -732,10 +732,10 @@ function release_osx64(appDirectory) {
             target: path.join(RELEASE_DIR, getReleaseFilename('macOS', 'dmg')),
             basepath: path.join(appDirectory, pkg.name, 'osx64'),
             specification: {
-                title: 'WingFlight Blackbox', // <= volume name; should be smaller than 27 chars.
+                title: 'Gripora Blackbox', // <= volume name; should be smaller than 27 chars.
                 contents: [
                     { 'x': 448, 'y': 342, 'type': 'link', 'path': '/Applications' },
-                    { 'x': 192, 'y': 344, 'type': 'file', 'path': pkg.name + '.app', 'name': 'WingFlight Blackbox.app' }
+                    { 'x': 192, 'y': 344, 'type': 'file', 'path': pkg.name + '.app', 'name': 'Gripora Blackbox.app' }
                 ],
                 background: path.join(__dirname, 'images/dmg-background.png'),
                 format: 'UDZO',
