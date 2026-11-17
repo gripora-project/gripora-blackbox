@@ -1083,7 +1083,8 @@ var FlightLogParser = function(logData) {
                 //TODO Unify this somehow...
 
                 // Extract the firmware revision in case of Gripora/Rotorflight/Betaflight/Raceflight/Cleanfligh 2.x/Other
-                matches = fieldValue.match(/(gripora|.*flight).*(\d+)\.(\d+)(\.(\d+))*/i);
+                // e.g. "Gripora 4.6.0 (cdf2a39) STM32F7X2": take the first version after the name
+                matches = fieldValue.match(/(gripora|\w*flight)\D*(\d+)\.(\d+)(\.(\d+))?/i);
                 if(matches!=null) {
 
                     // Detecting requires looking at the revision string
@@ -1116,7 +1117,7 @@ var FlightLogParser = function(logData) {
 
                     that.sysConfig.firmware        = parseFloat(matches[2] + '.' + matches[3]).toFixed(1);
                     that.sysConfig.firmwarePatch   = (matches[5] != null)?parseInt(matches[5]):'0';
-                    that.sysConfig.firmwareVersion = that.sysConfig.firmware + '.' + that.sysConfig.firmwarePatch;
+                    that.sysConfig.firmwareVersion = parseInt(matches[2]) + '.' + parseInt(matches[3]) + '.' + that.sysConfig.firmwarePatch;
 
                 } else {
 
