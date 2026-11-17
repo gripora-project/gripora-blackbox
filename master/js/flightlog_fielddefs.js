@@ -237,7 +237,7 @@ var
         'USER4',
     ]),
 
-    // Positions mirror boxId_e in wingflight-firmware's src/main/fc/rc_modes.h,
+    // Positions mirror boxId_e in gripora-firmware's src/main/fc/rc_modes.h,
     // which has diverged from the RF_4_6 layout above: BOXATTHOLD was inserted
     // at bit 4 (pushing ALTHOLD to 5 and the reserved heli RESCUE slot to 6),
     // BOXPASSTHROUGH was inserted at bit 9, BOXOSD/BOXGOVSUSPEND/BOXGOVBYPASS
@@ -391,7 +391,7 @@ var
         'RPM_FILTER',
     ]),
 
-    // Same bit layout as FLIGHT_LOG_FEATURES_RF_4_3 -- wingflight-firmware kept
+    // Same bit layout as FLIGHT_LOG_FEATURES_RF_4_3 -- gripora-firmware kept
     // the old FEATURE_GOVERNOR bit reserved as FEATURE_UNUSED_26 rather than
     // renumbering (src/main/config/feature.h), so this must stay positional.
     // Bit 24 was also repurposed, from unused to FEATURE_THRUST_VECTOR, and is unused
@@ -864,7 +864,7 @@ var
         "USER4",
     ]),
 
-    // Positions mirror debugType_e in wingflight-firmware's build/debug.h, not
+    // Positions mirror debugType_e in gripora-firmware's build/debug.h, not
     // DEBUG_MODE_RF_4_6: the "Remove OSD" refactor deleted DEBUG_MAX7456_SIGNAL/
     // SPICLOCK outright (no reserved placeholder), renumbering every slot from
     // SBUS onward, and appended GYRO_CALIBRATION/AUTOHOVER/ATTHOLD/TVHOLD/GAIN_ATTEN/SNAP_RELAX/PROP_HANG at the
@@ -1032,7 +1032,7 @@ var
         "FIXED_WING"
     ]),
 
-    // wingflight-firmware's stateFlags_t (fc/runtime_config.h) trimmed the legacy 5-bit
+    // gripora-firmware's stateFlags_t (fc/runtime_config.h) trimmed the legacy 5-bit
     // enum down to 3 members and repurposed bit 2 for GPS_FIX_EVER instead of CALIBRATE_MAG --
     // reusing the BF/RF list above would mislabel it.
     FLIGHT_LOG_FLIGHT_STATE_NAME_WF = makeReadOnly([
@@ -1215,9 +1215,9 @@ function adjustFieldDefsList(firmwareType, firmwareVersion) {
             FAST_PROTOCOL = FAST_PROTOCOL_RF.slice();
         }
 
-    } else if(firmwareType == FIRMWARE_TYPE_WINGFLIGHT) {
+    } else if(firmwareType == FIRMWARE_TYPE_GRIPORA) {
 
-        // WingFlight is a fresh fork with no version history of its own yet, so
+        // Gripora is a fresh fork with no version history of its own yet, so
         // unlike Rotorflight above there's just one (current) field-def set --
         // no per-version branching needed.
         FLIGHT_LOG_FLIGHT_MODE_NAME = makeReadOnly(FLIGHT_LOG_FLIGHT_MODE_NAME_WF.slice());

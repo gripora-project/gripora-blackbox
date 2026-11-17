@@ -1,7 +1,7 @@
 {
-  "name": "wingflight-blackbox",
-  "displayName": "WingFlight Blackbox",
-  "description": "Crossplatform blackbox analytics tool for WingFlight flight control system.",
+  "name": "gripora-blackbox",
+  "displayName": "Gripora Blackbox",
+  "description": "Crossplatform blackbox analytics tool for Gripora flight control system.",
   "version": "0.0.0",
   "main": "index.html",
   "node-remote": "http://localhost:*",
@@ -24,9 +24,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "github.com/WingFlight/wingflight-blackbox"
+    "url": "github.com/gripora-project/gripora-blackbox"
   },
-  "author": "The WingFlight open source project.",
+  "author": "The Gripora open source project.",
   "license": "GPL-3.0",
   "dependencies": {
     "bootstrap": "~3.4.1",

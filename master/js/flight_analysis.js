@@ -280,7 +280,7 @@ var FlightAnalysis = (function() {
                 }
             }
         } else if (gyroActivity) {
-            // The normal case: no governor target logged (current WingFlight
+            // The normal case: no governor target logged (current Gripora
             // firmware doesn't log one at all -- see analyzeGovernorLab), and
             // an ungoverned prop's RPM naturally wanders with throttle/pitch
             // even during smooth, level cruise, so a plateau check on motor
@@ -376,7 +376,7 @@ var FlightAnalysis = (function() {
         var idx = ctx.stable.stableIndexes;
         var speedStable = pickAtIndexes(motorSpeed, idx);
 
-        // Current WingFlight firmware runs an RPM governor (flight/governor.c)
+        // Current Gripora firmware runs an RPM governor (flight/governor.c)
         // but doesn't log its internal target to blackbox -- only the actual
         // motor speed reaches the log. If a target ever does show up (older or
         // future logs), prefer the more precise sag-vs-target read; otherwise
@@ -992,7 +992,7 @@ var FlightAnalysis = (function() {
     // few deg/s, reporting 100 %+ errors on a well-tuned model.
     var TRACKING_GOOD = 0.2;    // |settled - 1| up to this is good
     var TRACKING_WATCH = 0.35;  // up to this is worth watching, beyond is attention
-    var F_GAIN_MIN = 50;        // Wingflight's minimum F (PID_F_GAIN_MIN)
+    var F_GAIN_MIN = 50;        // Gripora's minimum F (PID_F_GAIN_MIN)
     var TRACKING_MIN_WINDOWS = 30;              // fewer step-response windows than this aren't graded
     var TRACKING_PLAUSIBLE = [0.3, 3];          // a settled value outside this isn't a tracking result
     var F_ADVICE_RANGE = [0.5, 2];              // only suggest an F change inside this
@@ -1110,7 +1110,7 @@ var FlightAnalysis = (function() {
     // ------------------------------------------------------------------
     // Bounce-back lab -- how far the model swings back past level when the
     // stick returns to centre after a roll or loop. Same release detection as
-    // the Wingflight blackbox skill's bbtune.py.
+    // the Gripora blackbox skill's bbtune.py.
     // ------------------------------------------------------------------
 
     var BOUNCE_CENTRE = 5;            // deg/s: stick setpoint counted as centred

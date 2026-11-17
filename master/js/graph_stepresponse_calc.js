@@ -47,14 +47,14 @@
  *   - bypass: a mode that drives the surfaces without the gyro (MANUAL, PASSTHROUGH) was on.
  *     The gyro then shows the airframe's open-loop response, not the tune.
  *   - leveling: ANGLE, TRAINER, ATT HOLD or a GPS/failsafe mode was on, so the logged
- *     setpoint (the stick rate) isn't what the PID tracked. On Wingflight logs with F > 0
+ *     setpoint (the stick rate) isn't what the PID tracked. On Gripora logs with F > 0
  *     and no TPA/SPA scaling the PID's setpoint is recovered from the F term instead and
  *     the window is kept.
  *   - snap: the gyro ran past STEP_RESPONSE_SNAP_RATIO x the setpoint (a snap, pop top or
  *     stall autorotation), or the mixer sat at full travel for over
  *     STEP_RESPONSE_SAT_FRACTION of the window. Neither is the tune's response. The ratio
  *     is high enough that a tune overshooting by 50 % is still kept.
- * The mode checks use the logged box switch flags, so they apply to Wingflight and
+ * The mode checks use the logged box switch flags, so they apply to Gripora and
  * Rotorflight logs that name these modes; the other checks apply to every log.
  *
  * Coherence is the magnitude-squared coherence between setpoint and gyro over
@@ -83,7 +83,7 @@ const
     STEP_RESPONSE_ROTATING_FRACTION = 0.05,    // share of that span that must be rotating to count as flying
     STEP_RESPONSE_BYPASS_MODES      = ['GYRO OFF', 'SETUP', 'MANUAL', 'PASSTHROUGH'],
     STEP_RESPONSE_LEVELING_MODES    = ['ANGLE', 'HORIZON', 'TRAINER', 'ATTHOLD', 'GPSRESCUE', 'RESCUE', 'LOITER', 'RTH', 'FAILSAFE'],
-    STEP_RESPONSE_F_TERM_SCALE      = 0.000025; // Wingflight ROLL/PITCH/YAW_F_TERM_SCALE (src/main/flight/pid.h)
+    STEP_RESPONSE_F_TERM_SCALE      = 0.000025; // Gripora ROLL/PITCH/YAW_F_TERM_SCALE (src/main/flight/pid.h)
 
 var StepResponseCalc = StepResponseCalc || {
     _timeRange : {
@@ -187,10 +187,10 @@ StepResponseCalc._anyBit = function(flags1, flags2, bits) {
 };
 
 // Kf for an axis when the PID's setpoint can be recovered from the logged F term
-// (axisF = Kf x setpoint x 1000), else 0. Only on Wingflight logs with F > 0 and the
+// (axisF = Kf x setpoint x 1000), else 0. Only on Gripora logs with F > 0 and the
 // throttle and GPS speed attenuation at 100 % with no curve, since those scale F too.
 StepResponseCalc._recoverableKf = function(axisIndex) {
-    if (this._sysConfig.firmwareType !== FIRMWARE_TYPE_WINGFLIGHT) return 0;
+    if (this._sysConfig.firmwareType !== FIRMWARE_TYPE_GRIPORA) return 0;
     var tpa = this._unknownHeader('fw_tpa');
     if (tpa === null || tpa.replace(/\s/g, '') !== '100,0') return 0;
     var spa = this._unknownHeader('fw_spa');
