@@ -41,7 +41,7 @@ var DEFAULT_WORKSPACES = [
                     }
                 ],
                 "height": 1,
-                "label": "Yaw"
+                "label": "Turn Rate"
             },
             {
                 "fields": [

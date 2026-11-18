@@ -624,6 +624,8 @@ function BlackboxLogViewer() {
         $("#stepResponseAxisRoll").prop('checked', userSettings.stepResponseAxes ? userSettings.stepResponseAxes.roll : true);
         $("#stepResponseAxisPitch").prop('checked', userSettings.stepResponseAxes ? userSettings.stepResponseAxes.pitch : true);
         $("#stepResponseAxisYaw").prop('checked', userSettings.stepResponseAxes ? userSettings.stepResponseAxes.yaw : true);
+        // Gripora stabilises only yaw, as the steering loop
+        $(".stepResponseAxis-yaw .stepResponseAxisName").text(flightLog.getSysConfig().firmwareType === FIRMWARE_TYPE_GRIPORA ? "Steering" : "Yaw");
 
         setVideoInTime(false);
         setVideoOutTime(false);

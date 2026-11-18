@@ -827,6 +827,8 @@ function HeaderDialog(dialog, onSave) {
         var car = (sysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA);
         $('.pid_tuning .rollPID, .pid_tuning .pitchPID').toggle(!car);
         $('.pid_tuning .yawPID td:first').text(car ? 'Steering' : 'Yaw');
+        $('.yawBW td:first').text(car ? 'Steering' : 'Yaw');
+        $('td[name="rcYawRowName"] label, td[name="yaw_deadband"] label').text(car ? 'Steering' : 'Yaw');
         renderDriveSettings(sysConfig);
 
         // Gripora thrust vector loop, only in logs that carry its tune
