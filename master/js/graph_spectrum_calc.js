@@ -112,7 +112,7 @@ GraphSpectrumCalc.dataLoadFrequencyVsThrottle = function() {
             avgThrottle += flightSamples.throttle[indexThrottle];
         }
         // Average throttle, removing the decimal part
-        avgThrottle = Math.round(avgThrottle / 10 / fftChunkLength);
+        avgThrottle = Math.min(Math.round(avgThrottle / 10 / fftChunkLength), THROTTLE_VALUES - 1);
 
         numberSamplesThrottle[avgThrottle]++;
         if (!matrixFftOutput[avgThrottle]) {
@@ -291,7 +291,9 @@ GraphSpectrumCalc._getFlightSamplesFreqVsThrottle = function() {
         var chunk = allChunks[chunkIndex];
         for (var frameIndex = 0; frameIndex < chunk.frames.length; frameIndex++) {
             samples[samplesCount] = (this._dataBuffer.curve.lookupRaw(chunk.frames[frameIndex][this._dataBuffer.fieldIndex]));
-            throttle[samplesCount] = chunk.frames[frameIndex][FIELD_THROTTLE_INDEX]*10;
+            // rcCommand[4] is the throttle x1000, i.e. 10x the percent this array holds. Magnitude:
+            // on Gripora it is signed around neutral (below = brake/reverse).
+            throttle[samplesCount] = Math.min(Math.abs(chunk.frames[frameIndex][FIELD_THROTTLE_INDEX]), 1000);
             samplesCount++;
         }
     }

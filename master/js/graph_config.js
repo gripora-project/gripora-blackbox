@@ -267,12 +267,15 @@ GraphConfig.load = function(config) {
 
         const gyroScaleMargin = 1.20; // Give a 20% margin for gyro graphs
 
+        // Gripora throttle and motor outputs are signed around neutral (-1000..1000)
+        const isGripora = sysConfig.firmwareType === FIRMWARE_TYPE_GRIPORA;
+
         try {
             if (fieldName.match(/^motor\[/)) {
                 // motors are defined as signed and it is possible to get negative values
                 // in this case keep zero in graph center
                 const mm = getMinMaxForFields(fieldName);
-                if(mm.min < 0) {
+                if(mm.min < 0 || isGripora) {
                     return {
                         offset: 0,
                         power: 1.0,
@@ -330,6 +333,13 @@ GraphConfig.load = function(config) {
                 return {
                     offset: 0,
                     power: 0.25,
+                    inputRange: 1000,
+                    outputRange: 1.0
+                };
+            } else if (fieldName == "rcCommand[4]" && isGripora) { // Throttle/brake, signed around neutral
+                return {
+                    offset: 0,
+                    power: 1.0,
                     inputRange: 1000,
                     outputRange: 1.0
                 };
@@ -443,6 +453,14 @@ GraphConfig.load = function(config) {
                                 };
                         }
                     case 'RC_COMMAND':
+                        if (isGripora) { // rcCommand, -500..500 per axis
+                            return {
+                                offset: 0,
+                                power: 1.0,
+                                inputRange: 500,
+                                outputRange: 1.0
+                            };
+                        }
                         return {
                             offset: -500,
                             power: 1.0,
@@ -600,6 +618,30 @@ GraphConfig.load = function(config) {
                                 };
                         }
                         break;
+                    case 'DRIVE':
+                        switch (fieldName) {
+                            case 'debug[0]': // throttle command x1000, signed
+                                return { offset: 0, power: 1.0, inputRange: 1000, outputRange: 1.0 };
+                            case 'debug[5]': // correction scale x1000, 0..1000
+                                return { offset: -500, power: 1.0, inputRange: 500, outputRange: 1.0 };
+                            case 'debug[1]': // state 0..3
+                                return { offset: -1.5, power: 1.0, inputRange: 2, outputRange: 1.0 };
+                            case 'debug[2]': // direction -1/+1
+                            case 'debug[4]': // flags 0/1
+                            case 'debug[7]':
+                                return { offset: 0, power: 1.0, inputRange: 1.2, outputRange: 1.0 };
+                        }
+                        break;
+                    case 'DRIVE_AIDS':
+                        switch (fieldName) {
+                            case 'debug[0]': // throttle in/out and steering x1000, signed
+                            case 'debug[1]':
+                            case 'debug[7]':
+                                return { offset: 0, power: 1.0, inputRange: 1000, outputRange: 1.0 };
+                            case 'debug[4]': // ABS floor x1000
+                                return { offset: -500, power: 1.0, inputRange: 500, outputRange: 1.0 };
+                        }
+                        break;
                     case 'FF_LIMIT':
                     case 'FEEDFORWARD_LIMIT':
                         return {
@@ -649,11 +691,11 @@ GraphConfig.load = function(config) {
      * Supply an array of strings `graphNames` to only fetch the graph with the given names.
      */
     GraphConfig.getExampleGraphConfigs = function(flightLog, graphNames) {
-        var
-            result = [],
-            i, j;
-
         const EXAMPLE_GRAPHS = [];
+
+        if (flightLog.getSysConfig().firmwareType === FIRMWARE_TYPE_GRIPORA) {
+            return GraphConfig.selectExampleGraphs(GraphConfig.griporaExampleGraphs(flightLog), graphNames);
+        }
 
         if (flightLog.isFieldEnabled().GYRO) {
             EXAMPLE_GRAPHS.push({label: "Gyros",fields: ["gyroADC[all]"]});
@@ -674,9 +716,6 @@ GraphConfig.load = function(config) {
             EXAMPLE_GRAPHS.push({label: "PID roll",fields: ["axisP[0]", "axisI[0]", "axisD[0]", "axisF[0]", "axisSum[0]", "gyroADC[0]", "setpoint[0]", "axisO[0]"]},
                                 {label: "PID pitch",fields: ["axisP[1]", "axisI[1]", "axisD[1]", "axisF[1]", "axisSum[1]", "gyroADC[1]", "setpoint[1]", "axisO[1]"]},
                                 {label: "PID yaw",fields: ["axisP[2]", "axisI[2]", "axisD[2]", "axisF[2]", "axisSum[2]", "gyroADC[2]", "setpoint[2]", "axisO[2]"]});
-        }
-        if (flightLog.isFieldEnabled().GOV) {
-            EXAMPLE_GRAPHS.push({label: "Governor",fields: ["govP", "govI", "govD", "govF", "govSum", "govRequest", "govTarget"]});
         }
         if (flightLog.isFieldEnabled().RPM) {
             EXAMPLE_GRAPHS.push({label: "Motor Speeds",fields: ["motor1speed", "motor2speed"]});
@@ -720,6 +759,88 @@ GraphConfig.load = function(config) {
         if (DEBUG_MODE[flightLog.getSysConfig().debug_mode] !== 'NONE') {
             EXAMPLE_GRAPHS.push({label: "Debug",fields: ["debug[all]"]});
         }
+
+        return GraphConfig.selectExampleGraphs(EXAMPLE_GRAPHS, graphNames);
+    };
+
+    /**
+     * Example graphs for a Gripora (car) log: only yaw is stabilised, as the steering loop, so
+     * roll/pitch setpoint, PID and mixer graphs are left out (they always hold zero), and
+     * throttle is signed around neutral (below = brake/reverse).
+     */
+    GraphConfig.griporaExampleGraphs = function(flightLog) {
+        const fields = flightLog.isFieldEnabled();
+        const graphs = [];
+
+        if (fields.SETPOINT || fields.GYRO) {
+            graphs.push({label: "Steering", fields: ["setpoint[2]", "gyroADC[2]", "axisError[2]"]});
+        }
+        if (fields.PID) {
+            graphs.push({label: "PID steering", fields: ["axisP[2]", "axisI[2]", "axisD[2]", "axisF[2]", "axisSum[2]", "gyroADC[2]", "setpoint[2]"]});
+        }
+        if (fields.RC_COMMAND || fields.MOTOR) {
+            graphs.push({label: "Throttle", fields: ["rcCommand[4]", "motor[0]", "motor[1]"]});
+        }
+        if (fields.RC_COMMAND) {
+            graphs.push({label: "RC Command", fields: ["rcCommand[2]", "rcCommand[4]"]});
+        }
+        if (fields.MIXER) {
+            graphs.push({label: "Steering Output", fields: ["mixer[2]"]});
+        }
+        if (fields.GYRO) {
+            graphs.push({label: "Gyros", fields: ["gyroADC[all]"]});
+        }
+        if (fields.GYRORAW) {
+            graphs.push({label: "Gyros (pre-filter)", fields: ["gyroRAW[all]"]});
+        }
+        if (fields.RPM) {
+            graphs.push({label: "Motor Speeds", fields: ["motor1speed", "motor2speed"]});
+        }
+        if (fields.MOTOR) {
+            graphs.push({label: "Motors", fields: ["motor[all]"]});
+        }
+        if (fields.SERVO) {
+            graphs.push({label: "Servos", fields: ["servo[all]"]});
+        }
+        if (fields.BATTERY) {
+            graphs.push({label: "Battery", fields: ["Vbat", "Ibat"]});
+        }
+        if (fields.VBEC || fields.VBUS) {
+            graphs.push({label: "Voltages", fields: ["Vbec", "Vbus"]});
+        }
+        if (fields.TEMP || fields.ESC || fields.ESC2 || fields.BEC) {
+            graphs.push({label: "Temperatures", fields: ["Tmcu", "Tesc", "Tesc2", "Tbec"]});
+        }
+        if (fields.ESC) {
+            graphs.push({label: "ESC Telemetry", fields: ["EscV", "EscI", "EscCap", "EscRPM", "EscThr", "EscPWM"]});
+        }
+        if (fields.ESC2) {
+            graphs.push({label: "ESC2 Telemetry", fields: ["Esc2V", "Esc2I", "Esc2Cap", "Esc2RPM"]});
+        }
+        if (fields.BEC) {
+            graphs.push({label: "BEC Telemetry", fields: ["BecV", "BecI"]});
+        }
+        if (fields.RSSI) {
+            graphs.push({label: "RSSI", fields: ["rssi"]});
+        }
+        if (fields.ATTITUDE) {
+            graphs.push({label: "Attitude", fields: ["attitude[all]"]});
+        }
+        if (fields.ACC) {
+            graphs.push({label: "Accelerometer", fields: ["accADC[all]"]});
+        }
+        if (DEBUG_MODE[flightLog.getSysConfig().debug_mode] !== 'NONE') {
+            graphs.push({label: "Debug", fields: ["debug[all]"]});
+        }
+
+        return graphs;
+    };
+
+    // Copies the example graphs, keeping only those named in `graphNames` when it is given.
+    GraphConfig.selectExampleGraphs = function(EXAMPLE_GRAPHS, graphNames) {
+        var
+            result = [],
+            i, j;
 
         for (i = 0; i < EXAMPLE_GRAPHS.length; i++) {
             var

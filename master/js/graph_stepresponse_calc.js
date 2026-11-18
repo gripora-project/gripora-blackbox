@@ -81,7 +81,7 @@ const
     STEP_RESPONSE_ROTATING_RATE     = 40,      // deg/s, |roll| + |pitch| gyro counted as rotating
     STEP_RESPONSE_ROTATING_SPAN_SEC = 2,       // +- seconds around a sample searched for rotation
     STEP_RESPONSE_ROTATING_FRACTION = 0.05,    // share of that span that must be rotating to count as flying
-    STEP_RESPONSE_BYPASS_MODES      = ['GYRO OFF', 'SETUP', 'MANUAL', 'PASSTHROUGH'],
+    STEP_RESPONSE_BYPASS_MODES      = ['GYRO OFF', 'SETUP', 'MANUAL', 'PASSTHROUGH'], // GYRO OFF: Gripora steering without the gyro
     STEP_RESPONSE_LEVELING_MODES    = ['ANGLE', 'HORIZON', 'TRAINER', 'ATTHOLD', 'GPSRESCUE', 'RESCUE', 'LOITER', 'RTH', 'FAILSAFE'],
     STEP_RESPONSE_F_TERM_SCALE      = 0.000025; // Gripora ROLL/PITCH/YAW_F_TERM_SCALE (src/main/flight/pid.h)
 
@@ -151,18 +151,6 @@ StepResponseCalc._getFlightChunks = function() {
     return this._flightLog.getChunksInTimeRange(logStart, logEnd);
 };
 
-// Value of a header line the parser didn't recognise (kept in sysConfig.unknownHeaders),
-// or null when the log doesn't have it.
-StepResponseCalc._unknownHeader = function(name) {
-    var headers = this._sysConfig.unknownHeaders || [];
-    for (var i = 0; i < headers.length; i++) {
-        if (headers[i].name === name) {
-            return String(headers[i].value);
-        }
-    }
-    return null;
-};
-
 // Bits of the named modes in this log's flight mode table (FLIGHT_LOG_FLIGHT_MODE_NAME,
 // which matches flightModeFlags/flightModeFlags2 for the log's firmware).
 StepResponseCalc._modeBits = function(names) {
@@ -188,13 +176,13 @@ StepResponseCalc._anyBit = function(flags1, flags2, bits) {
 
 // Kf for an axis when the PID's setpoint can be recovered from the logged F term
 // (axisF = Kf x setpoint x 1000), else 0. Only on Gripora logs with F > 0 and the
-// throttle and GPS speed attenuation at 100 % with no curve, since those scale F too.
+// throttle and speed attenuation at 100 % with no curve, since those scale F too.
 StepResponseCalc._recoverableKf = function(axisIndex) {
     if (this._sysConfig.firmwareType !== FIRMWARE_TYPE_GRIPORA) return 0;
-    var tpa = this._unknownHeader('fw_tpa');
-    if (tpa === null || tpa.replace(/\s/g, '') !== '100,0') return 0;
-    var spa = this._unknownHeader('fw_spa');
-    if (spa !== null && !/^100,0(,|$)/.test(spa.replace(/\s/g, ''))) return 0;
+    var tpa = this._sysConfig.fw_tpa;   // gain, curve
+    if (!tpa || tpa[0] !== 100 || tpa[1] !== 0) return 0;
+    var spa = this._sysConfig.fw_spa;   // gain, curve, top speed
+    if (spa && (spa[0] !== 100 || spa[1] !== 0)) return 0;
     var pid = this._sysConfig[['rollPID', 'pitchPID', 'yawPID'][axisIndex]];
     var F = pid && pid[3];
     return F > 0 ? STEP_RESPONSE_F_TERM_SCALE * F : 0;
@@ -271,10 +259,16 @@ StepResponseCalc._getSamples = function() {
         }
     }
 
-    // Flying: some roll/pitch rotation within +- ROTATING_SPAN of the sample
+    // Flying: some roll/pitch rotation within +- ROTATING_SPAN of the sample. A car barely
+    // rolls or pitches, so on Gripora logs it is yaw rotation instead: a car standing still
+    // doesn't turn whatever the stick does (and the firmware fades the gyro correction out
+    // at a standstill).
+    var car = this._sysConfig.firmwareType === FIRMWARE_TYPE_GRIPORA;
     var rotating = new Float64Array(count + 1);
     for (var i = 0; i < count; i++) {
-        var rate = Math.abs(axes[0].present ? axes[0].gyro[i] : 0) + Math.abs(axes[1].present ? axes[1].gyro[i] : 0);
+        var rate = car
+            ? Math.abs(axes[2].present ? axes[2].gyro[i] : 0)
+            : Math.abs(axes[0].present ? axes[0].gyro[i] : 0) + Math.abs(axes[1].present ? axes[1].gyro[i] : 0);
         rotating[i + 1] = rotating[i] + (rate > STEP_RESPONSE_ROTATING_RATE ? 1 : 0);
     }
     var span = Math.round(STEP_RESPONSE_ROTATING_SPAN_SEC * this._blackBoxRate);

@@ -188,6 +188,33 @@ function FlightLogFieldPresenter() {
         'govTarget':'HS Target',
     };
 
+    // Gripora stabilises only yaw, as the steering loop: roll and pitch PID, setpoint and mixer
+    // slots are logged but always zero. Throttle is signed around neutral (below = brake/reverse).
+    const FRIENDLY_FIELD_NAMES_GRIPORA = {
+        'axisP[2]': 'PID P [steering]',
+        'axisI[2]': 'PID I [steering]',
+        'axisD[2]': 'PID D [steering]',
+        'axisF[2]': 'PID Feedforward [steering]',
+        'axisB[2]': 'PID Boost [steering]',
+        'axisSum[2]' : 'PID Sum [steering]',
+        'axisPD[2]' : 'PID PD Sum [steering]',
+        'axisError[2]' : 'PID Error [steering]',
+
+        'rcCommand[2]': 'RC Command [steering]',
+        'rcCommand[4]': 'RC Command [throttle/brake]',
+
+        'setpoint[2]': 'Setpoint [steering]',
+
+        'mixer[0]': 'Mixer [roll]',
+        'mixer[1]': 'Mixer [pitch]',
+        'mixer[2]': 'Mixer [steering]',
+
+        'flightModeFlags': 'Mode Flags',
+        'flightModeFlags2': 'Mode Flags 2',
+    };
+
+    let friendlyFieldNames = FRIENDLY_FIELD_NAMES;
+
     const DEBUG_FRIENDLY_FIELD_NAMES_INITIAL = {
         'NONE' : {
             'debug[all]':'Debug [all]',
@@ -717,7 +744,7 @@ function FlightLogFieldPresenter() {
             'debug[5]':'Last Recapture Axis',
             'debug[6]':'Tracking Axes',
         },
-        // Gripora throttle (TPA) and GPS speed (SPA) gain attenuation
+        // Gripora throttle (TPA) and speed (SPA) gain attenuation (flight/pid.c)
         'GAIN_ATTEN' : {
             'debug[all]':'Gain Attenuation',
             'debug[0]':'TPA Scale',
@@ -725,6 +752,32 @@ function FlightLogFieldPresenter() {
             'debug[2]':'SPA Speed (filtered)',
             'debug[3]':'GPS Speed (raw)',
             'debug[4]':'GPS Fix',
+        },
+        // Gripora drive state: travel direction and speed for the steering loop (flight/drive.c)
+        'DRIVE' : {
+            'debug[all]':'Drive State',
+            'debug[0]':'Throttle Command',
+            'debug[1]':'Commanded State',
+            'debug[2]':'Direction',
+            'debug[3]':'Wheel Speed',
+            'debug[4]':'RPM Known',
+            'debug[5]':'Gyro Correction Scale',
+            'debug[6]':'Motor 1 RPM',
+            'debug[7]':'Stopped',
+        },
+        // Gripora drive aids: ABS and traction control on the throttle/brake command
+        // (flight/drive_aids.c). Slot 3 is the ABS rate while braking and the throttle
+        // traction control allows while driving forward.
+        'DRIVE_AIDS' : {
+            'debug[all]':'Drive Aids',
+            'debug[0]':'Throttle In',
+            'debug[1]':'Throttle Out',
+            'debug[2]':'Flags',
+            'debug[3]':'ABS Rate / TC Allowed Throttle',
+            'debug[4]':'ABS Floor',
+            'debug[5]':'ABS Hold',
+            'debug[6]':'ABS Cycle Phase',
+            'debug[7]':'Steering',
         },
         // Gripora snap relax: roll/pitch feedback relaxed against a pop top, pinwheel or snap
         'SNAP_RELAX' : {
@@ -754,10 +807,25 @@ function FlightLogFieldPresenter() {
 
         DEBUG_FRIENDLY_FIELD_NAMES = {...DEBUG_FRIENDLY_FIELD_NAMES_INITIAL};
 
+        friendlyFieldNames = (firmwareType === FIRMWARE_TYPE_GRIPORA)
+            ? {...FRIENDLY_FIELD_NAMES, ...FRIENDLY_FIELD_NAMES_GRIPORA}
+            : FRIENDLY_FIELD_NAMES;
+
+        if (firmwareType === FIRMWARE_TYPE_GRIPORA) {
+            // DEBUG(RC_COMMAND, axis, rcCommand[axis]) in fc/rc.c: -500..500 per axis
+            DEBUG_FRIENDLY_FIELD_NAMES.RC_COMMAND = {
+                'debug[all]':'Debug RC Command',
+                'debug[0]':'RC Command [roll]',
+                'debug[1]':'RC Command [pitch]',
+                'debug[2]':'RC Command [steering]',
+                'debug[3]':'RC Command [throttle/brake]',
+            };
+        }
+
         // I-term Relax is a generic PID anti-windup technique, not heli-specific,
         // and is still present in gripora-firmware -- applies to both.
         if (firmwareType === FIRMWARE_TYPE_ROTORFLIGHT || firmwareType === FIRMWARE_TYPE_GRIPORA) {
-           if (semver.gte(firmwareVersion, '4.3.0')) {
+           if (firmwareType === FIRMWARE_TYPE_GRIPORA || semver.gte(firmwareVersion, '4.3.0')) {
                 DEBUG_FRIENDLY_FIELD_NAMES.ITERM_RELAX = {
                     'debug[all]':'I-term Relax',
                     'debug[0]':'Setpoint',
@@ -844,6 +912,10 @@ function FlightLogFieldPresenter() {
         }
     };
 
+    function isGripora(flightLog) {
+        return !!flightLog && flightLog.getSysConfig().firmwareType === FIRMWARE_TYPE_GRIPORA;
+    }
+
     FlightLogFieldPresenter.presentFlags = function(flags, flagNames) {
         var
             printedFlag = false,
@@ -904,7 +976,8 @@ function FlightLogFieldPresenter() {
     FlightLogFieldPresenter.presentChangeEvent = function presentChangeEvent(flags, lastFlags, flagNames) {
         var eventState = '';
         var found = false;
-        for(var i = 0; i < flagNames.length; i++) {
+        // The event carries one 32-bit word (boxId 0-31); 1<<i wraps above that
+        for(var i = 0; i < Math.min(flagNames.length, 32); i++) {
            if((1<<i) & (flags ^ lastFlags)) { // State Changed
                eventState += '|' + flagNames[i] + ' ' + (((1<<i) & flags)?'ON':'OFF');
                found = true;
@@ -944,6 +1017,10 @@ function FlightLogFieldPresenter() {
             case 'rcCommand[3]':
                 return (value / 5).toFixed(1) + ' %';
             case 'rcCommand[4]':
+                if (isGripora(flightLog)) {
+                    // Signed around neutral: forward above, brake/reverse below
+                    return (value / 10).toFixed(1) + " %" + (value > 0 ? " forward" : value < 0 ? " brake/reverse" : " neutral");
+                }
                 return (value / 10).toFixed(1) + " %";
 
             case 'setpoint[0]':
@@ -955,8 +1032,15 @@ function FlightLogFieldPresenter() {
 
             case 'mixer[0]':
             case 'mixer[1]':
+                if (isGripora(flightLog)) {
+                    // Stabilized mixer input x1000, 1000 = full travel
+                    return (value / 10).toFixed(1) + '%';
+                }
                 return (value * 0.012).toFixed(1) + "°";
             case 'mixer[2]':
+                if (isGripora(flightLog)) {
+                    return (value / 10).toFixed(1) + '%';
+                }
                 return (value * 0.024).toFixed(1) + "°";
             case 'mixer[3]':
                 return (value / 10).toFixed(1) + '%';
@@ -1156,6 +1240,9 @@ function FlightLogFieldPresenter() {
                 case 'MIXER':
                     return Math.round(flightLog.rcCommandRawToThrottle(value)) + " %";
                 case 'RC_COMMAND':
+                    if (isGripora(flightLog)) {
+                        return (value / 5).toFixed(1) + " %";
+                    }
                     switch (fieldName) {
                         case 'debug[0]': // roll
                         case 'debug[1]': // pitch
@@ -1297,7 +1384,7 @@ function FlightLogFieldPresenter() {
                     }
                     break;
                 case 'ITERM_RELAX':
-                    if ((flightLog.getSysConfig().firmwareType === FIRMWARE_TYPE_ROTORFLIGHT || flightLog.getSysConfig().firmwareType === FIRMWARE_TYPE_GRIPORA) && semver.gte(flightLog.getSysConfig().firmwareVersion, '4.3.0')) {
+                    if (isGripora(flightLog) || (flightLog.getSysConfig().firmwareType === FIRMWARE_TYPE_ROTORFLIGHT && semver.gte(flightLog.getSysConfig().firmwareVersion, '4.3.0'))) {
                         switch (fieldName) {
 	                           case 'debug[0]': // setpoint
 	                           case 'debug[1]': // Gyro Rate
@@ -1509,6 +1596,44 @@ function FlightLogFieldPresenter() {
                             return value ? 'Fix' : 'No fix';
                     }
                     break;
+                case 'DRIVE':
+                    switch (fieldName) {
+                        case 'debug[0]': // throttle command x1000, signed
+                        case 'debug[5]': // gyro correction scale x1000
+                            return (value / 10).toFixed(1) + "%";
+                        case 'debug[1]': // driveState_e
+                            return ['Neutral', 'Forward', 'Brake', 'Reverse'][value] ?? value.toFixed(0);
+                        case 'debug[2]': // travel direction, +1/-1
+                            return value > 0 ? 'Forward' : value < 0 ? 'Reverse' : value.toFixed(0);
+                        case 'debug[3]': // wheel speed, 0.1 km/h
+                            return (value / 10).toFixed(1) + " km/h";
+                        case 'debug[4]':
+                            return value ? 'Yes' : 'No';
+                        case 'debug[6]':
+                            return value.toFixed(0) + " rpm";
+                        case 'debug[7]':
+                            return value ? 'Stopped' : 'Moving';
+                    }
+                    break;
+                case 'DRIVE_AIDS':
+                    switch (fieldName) {
+                        case 'debug[0]': // throttle in x1000, signed
+                        case 'debug[1]': // throttle out x1000, signed
+                        case 'debug[4]': // ABS floor x1000
+                        case 'debug[7]': // steering x1000
+                            return (value / 10).toFixed(1) + "%";
+                        case 'debug[2]': { // DRIVE_AIDS_FLAG_* in flight/drive_aids.h
+                            const names = ['On', 'ABS armed', 'ABS releasing', 'TC armed', 'TC limiting'];
+                            const set = names.filter((_, i) => value & (1 << i));
+                            return set.length ? set.join(', ') : 'Off';
+                        }
+                        case 'debug[3]': // ABS rate x10 while braking, TC allowed throttle x1000 driving forward: both value / 10
+                            return (value / 10).toFixed(1) + " (ABS Hz / TC %)";
+                        case 'debug[5]': // ABS hold, ms
+                        case 'debug[6]': // ABS cycle phase, ms
+                            return value.toFixed(0) + " ms";
+                    }
+                    break;
                 case 'SNAP_RELAX':
                     switch (fieldName) {
                         case 'debug[0]': // relax amount x1000
@@ -1566,8 +1691,8 @@ function FlightLogFieldPresenter() {
                 return fieldName;
             }
         }
-        if (FRIENDLY_FIELD_NAMES[fieldName]) {
-            return FRIENDLY_FIELD_NAMES[fieldName];
+        if (friendlyFieldNames[fieldName]) {
+            return friendlyFieldNames[fieldName];
         }
 
         return fieldName;

@@ -133,7 +133,7 @@
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right">
-                        <li><a href="#" class="btn-video-export" title="Render the graphs, with any synced flight video, to a WebM file">Video&hellip;</a></li>
+                        <li><a href="#" class="btn-video-export" title="Render the graphs, with any synced video, to a WebM file">Video&hellip;</a></li>
                         <li><a href="#" class="btn-csv-export" title="Export the log's data to a CSV file">CSV&hellip;</a></li>
                         <li><a href="#" class="btn-workspaces-export" title="Export your workspace configurations to a file">Workspaces&hellip;</a></li>
                     </ul>
@@ -141,7 +141,7 @@
 
                 <span class="wf-navbar-divider" aria-hidden="true"></span>
 
-                <button type="button" class="btn wf-nav-icon open-flight-analysis-dialog" data-toggle="tooltip" data-placement="bottom" title="Flight analysis">
+                <button type="button" class="btn wf-nav-icon open-flight-analysis-dialog" data-toggle="tooltip" data-placement="bottom" title="Run analysis">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                 </button>
                 <button type="button" class="btn wf-nav-icon open-user-settings-dialog" data-toggle="tooltip" data-placement="bottom" title="Settings">
@@ -828,7 +828,20 @@
                                                 <tbody>
                                                 </tbody>
                                             </table>
-                                            <p class="gain_scaling_note">Main loop P, D, F and B are also scaled in flight by throttle (TPA) and GPS speed (SPA) attenuation. The thrust vector loop has neither.</p>
+                                            <p class="gain_scaling_note">P, D, F and B are also scaled while driving by throttle (TPA) and speed (SPA) attenuation, and steering P, I and D by the drive state (speed and direction). The thrust vector loop of older logs has neither.</p>
+                                        </div>
+
+                                        <!-- Gripora: gain attenuation and drive aids of the PID profile in use, hidden for logs without these headers -->
+                                        <div class="drive_settings">
+                                            <table class="parameter cf">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="row" colspan="2">Gain Attenuation and Drive Aids</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                            </table>
                                         </div>
 
                                         <table id="pid_gov_header" class="parameter cf">
@@ -3098,7 +3111,7 @@
                             </div>
                         </div>
                         <div class="form-group video-dim-section">
-                            <label class="col-sm-3 control-label">Dim flight video</label>
+                            <label class="col-sm-3 control-label">Dim video</label>
                             <div class="col-sm-9">
                                 <select class="form-control video-dim">
                                     <option value="0.0">0%</option>
@@ -3127,8 +3140,8 @@
                             <label class="col-sm-3 control-label">Note</label>
                             <div class="col-sm-9">
                                 <p class="form-control-static">
-                                    If you experience problems with the background flight video being glitchy in the exported video,
-                                    <a href="https://github.com/betaflight/blackbox-tools/blob/master/Readme.md" target="_blank" rel="noopener noreferrer">follow the instructions here</a> to re-encode your flight video.
+                                    If you experience problems with the background video being glitchy in the exported video,
+                                    <a href="https://github.com/betaflight/blackbox-tools/blob/master/Readme.md" target="_blank" rel="noopener noreferrer">follow the instructions here</a> to re-encode your video.
                                 </p>
                             </div>
                         </div>
@@ -3574,7 +3587,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close" data-toggle="tooltip" title="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                    <h4 class="modal-title">Flight Analysis</h4>
+                    <h4 class="modal-title">Run Analysis</h4>
                 </div>
                 <div class="modal-body" id="flightAnalysisBody">
                 </div>

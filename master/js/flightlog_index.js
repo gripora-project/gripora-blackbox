@@ -113,14 +113,16 @@ function FlightLogIndex(logData) {
 
                                     if (motorFields.length) {
                                         throttleTotal = 0;
+                                        // Magnitude: motor outputs are signed on reversible ESCs (Gripora)
                                         for (var j = 0; j < motorFields.length; j++) {
-                                            throttleTotal += frame[motorFields[j]];
+                                            throttleTotal += Math.abs(frame[motorFields[j]]);
                                         }
 
                                         intraIndex.avgThrottle.push(Math.round(throttleTotal / motorFields.length));
                                     }
 
-                                    intraIndex.throttleCmd.push(throttleCmdIndex !== undefined ? frame[throttleCmdIndex] : 0);
+                                    // Magnitude: Gripora throttle is signed around neutral (below = brake/reverse)
+                                    intraIndex.throttleCmd.push(throttleCmdIndex !== undefined ? Math.abs(frame[throttleCmdIndex]) : 0);
 
                                     // Store current PID profile state
                                     intraIndex.pidProfile.push(currentPIDProfile);

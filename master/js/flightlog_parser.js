@@ -324,6 +324,11 @@ var FlightLogParser = function(logData) {
             tv_master_gain:null,                    // Thrust vector master gain [ROLL, PITCH, YAW], percent
             tv_gain_curve:null,                     // Thrust vector master gain curve [ROLL, PITCH, YAW]
             gainCurves:null,                        // gain_curve_1..8: [{count, points: [{x, y}]}]
+            // Gripora per-PID-profile gain attenuation and drive aids. null when the log doesn't have them.
+            fw_tpa:null,                            // Throttle attenuation [gain %, curve (0 = none)]
+            fw_spa:null,                            // Speed attenuation [gain %, curve (0 = none), top speed km/h]
+            drive_abs:null,                         // ABS [mode, freq Hz, floor %, hold ms, trigger %, dyn freq Hz, dyn hold ms, corner freq Hz, corner hold ms]
+            drive_tc:null,                          // Traction control [mode, ramp time ms]
             magPID:null,                            // Magnetometer   P
             velPID:[null, null, null],              // Velocity      [P, I, D]
             yaw_p_limit:null,                       // Yaw P Limit
@@ -1016,6 +1021,10 @@ var FlightLogParser = function(logData) {
             case "tvYawPID":
             case "tv_master_gain":
             case "tv_gain_curve":
+            case "fw_tpa":
+            case "fw_spa":
+            case "drive_abs":
+            case "drive_tc":
             case "gps_nav":
                 // gps_nav: loiter_radius, loiter_direction, rth_altitude, min_sats, max_bank_angle,
                 // max_pitch_angle, bearing_kp, altitude_kp, altitude_kd, throttle, turn_coordination
