@@ -194,7 +194,7 @@ StepResponsePlot._drawLegend = function (canvasCtx, WIDTH, HEIGHT) {
     canvasCtx.textAlign = "left";
     canvasCtx.textBaseline = "middle";
     canvasCtx.fillText(
-      STEP_RESPONSE_AXIS_LABELS[axis],
+      this._axisLabel(axis),
       4 + PADDING / 2 + SWATCH_WIDTH + 6,
       y,
     );
@@ -272,6 +272,12 @@ StepResponsePlot._drawGrid = function (canvasCtx, WIDTH, HEIGHT) {
   }
 };
 
+// Gripora stabilises only yaw, as the steering loop
+StepResponsePlot._axisLabel = function (axis) {
+  const car = this._sysConfig && this._sysConfig.firmwareType === FIRMWARE_TYPE_GRIPORA;
+  return car && axis === "yaw" ? "Steering" : STEP_RESPONSE_AXIS_LABELS[axis];
+};
+
 StepResponsePlot._formatPID = function (axis) {
   const pidField = STEP_RESPONSE_AXIS_PID_FIELD[axis];
   const pid = this._sysConfig && this._sysConfig[pidField];
@@ -309,7 +315,7 @@ StepResponsePlot._drawAxisResponse = function (
   if (!axisData || axisData.windowCount === 0) {
     this._drawLabel(
       canvasCtx,
-      pidLabel || STEP_RESPONSE_AXIS_LABELS[axis] + ": no data",
+      pidLabel || this._axisLabel(axis) + ": no data",
       WIDTH - 4,
       rowY,
       "right",
@@ -350,7 +356,7 @@ StepResponsePlot._drawAxisResponse = function (
       ? ", coherence " + axisData.coherence.toFixed(2)
       : "");
   const status = axisData.valid ? "" : " (low confidence)";
-  const label = (pidLabel || STEP_RESPONSE_AXIS_LABELS[axis]) + quality + status;
+  const label = (pidLabel || this._axisLabel(axis)) + quality + status;
   this._drawLabel(canvasCtx, label, WIDTH - 4, rowY, "right", "top", color);
 };
 
@@ -380,7 +386,7 @@ StepResponsePlot._drawExclusions = function (canvasCtx, WIDTH, HEIGHT) {
   }
   const prefix =
     "Skipped windows (" +
-    axes.map((axis) => STEP_RESPONSE_AXIS_LABELS[axis][0]).join("/") +
+    axes.map((axis) => this._axisLabel(axis)[0]).join("/") +
     "): ";
   this._drawLabel(
     canvasCtx,

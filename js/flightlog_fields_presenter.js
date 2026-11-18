@@ -205,6 +205,9 @@ function FlightLogFieldPresenter() {
 
         'setpoint[2]': 'Setpoint [steering]',
 
+        'gyroADC[2]': 'Gyro [turn rate]',
+        'gyroRAW[2]': 'Unfiltered Gyro [turn rate]',
+
         'mixer[0]': 'Mixer [roll]',
         'mixer[1]': 'Mixer [pitch]',
         'mixer[2]': 'Mixer [steering]',
