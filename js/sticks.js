@@ -211,6 +211,12 @@ function FlightLogSticks(flightLog, rcCommandFields, canvas) {
         }
 
         var yawValue = ((userSettings.stickInvertYaw) ? -1 : 1) * rcCommand[2];
+
+        // Gripora throttle is signed around neutral (-1000..1000, below = brake/reverse), so
+        // neutral is the stick centre; otherwise 0..1000 with zero at the bottom.
+        var throttleValue = (flightLog.getSysConfig().firmwareType === FIRMWARE_TYPE_GRIPORA)
+            ? rcCommand[4] / 1000
+            : (rcCommand[4] - 500) / 500;
         // map the stick positions based upon selected stick mode (default is mode 2)
 
         //Compute the position of the sticks in the range [-1..1] (left stick x, left stick y, right stick x, right stick y)
@@ -219,13 +225,13 @@ function FlightLogSticks(flightLog, rcCommandFields, canvas) {
                 stickPositions[0] = yawValue / config.yawStickMax; //Yaw
                 stickPositions[1] = pitchStickCurve.lookup(-rcCommand[1]); //Pitch
                 stickPositions[2] = pitchStickCurve.lookup(rcCommand[0]); //Roll
-                stickPositions[3] = (rcCommand[4] - 500) / 500; //Throttle
+                stickPositions[3] = throttleValue; //Throttle
 
                 if (stickLabel != null) {
                     stickLabel[0] = rcCommandLabels[2];
                     stickLabel[1] = rcCommandLabels[1];
                     stickLabel[2] = rcCommandLabels[0];
-                    stickLabel[3] = rcCommandLabels[3];
+                    stickLabel[3] = rcCommandLabels[4];
                 }
 
                 break;
@@ -233,25 +239,25 @@ function FlightLogSticks(flightLog, rcCommandFields, canvas) {
                 stickPositions[0] = pitchStickCurve.lookup(rcCommand[0]); //Roll
                 stickPositions[1] = pitchStickCurve.lookup(-rcCommand[1]); //Pitch
                 stickPositions[2] = yawValue / config.yawStickMax; //Yaw
-                stickPositions[3] = (rcCommand[4] - 500) / 500; //Throttle
+                stickPositions[3] = throttleValue; //Throttle
 
                 if (stickLabel != null) {
                     stickLabel[0] = rcCommandLabels[0];
                     stickLabel[1] = rcCommandLabels[1];
                     stickLabel[2] = rcCommandLabels[2];
-                    stickLabel[3] = rcCommandLabels[3];
+                    stickLabel[3] = rcCommandLabels[4];
                 }
 
                 break;
             case STICK_MODE_4:
                 stickPositions[0] = pitchStickCurve.lookup(rcCommand[0]); //Roll
-                stickPositions[1] = (rcCommand[4] - 500) / 500; //Throttle
+                stickPositions[1] = throttleValue; //Throttle
                 stickPositions[2] = yawValue / config.yawStickMax; //Yaw
                 stickPositions[3] = pitchStickCurve.lookup(-rcCommand[1]); //Pitch
 
                 if (stickLabel != null) {
                     stickLabel[0] = rcCommandLabels[0];
-                    stickLabel[1] = rcCommandLabels[3];
+                    stickLabel[1] = rcCommandLabels[4];
                     stickLabel[2] = rcCommandLabels[2];
                     stickLabel[3] = rcCommandLabels[1];
                 }
@@ -259,13 +265,13 @@ function FlightLogSticks(flightLog, rcCommandFields, canvas) {
                 break;
             default: // Mode 2
                 stickPositions[0] = yawValue / config.yawStickMax; //Yaw
-                stickPositions[1] = (rcCommand[4] - 500) / 500; //Throttle
+                stickPositions[1] = throttleValue; //Throttle
                 stickPositions[2] = pitchStickCurve.lookup(rcCommand[0]); //Roll
                 stickPositions[3] = pitchStickCurve.lookup(-rcCommand[1]); //Pitch
 
                 if (stickLabel != null) {
                     stickLabel[0] = rcCommandLabels[2];
-                    stickLabel[1] = rcCommandLabels[3];
+                    stickLabel[1] = rcCommandLabels[4];
                     stickLabel[2] = rcCommandLabels[0];
                     stickLabel[3] = rcCommandLabels[1];
                 }

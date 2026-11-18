@@ -544,13 +544,14 @@ function FlightLogGrapher(flightLog, graphConfig, canvas, stickCanvas, craftWrap
                 drawEventLine(x, labelY, `RescueState: ${FlightLogFieldPresenter.presentEnum(event.data.rescueState, FLIGHT_LOG_RESCUE_STATES)}`, "rgba(0,0,255,0.75)", 2);
             break;
             case FlightLogEvent.AIRBORNE_STATE:
-                drawEventLine(x, labelY, `Airborne: ${FlightLogFieldPresenter.presentEnum(event.data.airborneState, FLIGHT_LOG_AIRBORNE_STATES)}`, "rgba(255,150,0,0.75)", 2);
+                // On Gripora logs this is the "car running" latch (FLIGHT_LOG_AIRBORNE_STATES_GRIPORA)
+                drawEventLine(x, labelY, `${flightLog.getSysConfig().firmwareType === FIRMWARE_TYPE_GRIPORA ? 'Run' : 'Airborne'}: ${FlightLogFieldPresenter.presentEnum(event.data.airborneState, FLIGHT_LOG_AIRBORNE_STATES)}`, "rgba(255,150,0,0.75)", 2);
             break;
             case FlightLogEvent.INFLIGHT_ADJUSTMENT:
                 drawEventLine(x, labelY, event.data.name + " = " + event.data.value, "rgba(0,255,255,0.5)", 2);
             break;
             case FlightLogEvent.FLIGHT_MODE:
-                drawEventLine(x, labelY, "Flight Mode Change" + FlightLogFieldPresenter.presentChangeEvent(event.data.newFlags, event.data.lastFlags, FLIGHT_LOG_FLIGHT_MODE_NAME), "rgba(0,0,255,0.75)", 3);
+                drawEventLine(x, labelY, "Mode Change" + FlightLogFieldPresenter.presentChangeEvent(event.data.newFlags, event.data.lastFlags, FLIGHT_LOG_FLIGHT_MODE_NAME), "rgba(0,0,255,0.75)", 3);
             break;
             case FlightLogEvent.DISARM:
                 drawEventLine(x, labelY, `Disarm: ${FlightLogFieldPresenter.presentEnum(event.data.reason, FLIGHT_LOG_DISARM_REASON)}`, "rgba(128,0,255,0.75)", 3);

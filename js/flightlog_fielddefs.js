@@ -237,61 +237,57 @@ var
         'USER4',
     ]),
 
-    // Positions mirror boxId_e in gripora-firmware's src/main/fc/rc_modes.h,
-    // which has diverged from the RF_4_6 layout above: BOXATTHOLD was inserted
-    // at bit 4 (pushing ALTHOLD to 5 and the reserved heli RESCUE slot to 6),
-    // BOXPASSTHROUGH was inserted at bit 9, BOXOSD/BOXGOVSUSPEND/BOXGOVBYPASS
-    // are reserved-but-unrenumbered (-> UNUSED), BOXGOVERNOR (bit 27) is now a
-    // real throttle-range governor engage switch rather than the old heli
-    // fallback, and BOXAUTOHOVER/BOXMANUAL/BOXAUTOTRIM were appended at the end.
-    // Order must match boxId_e in src/main/fc/rc_modes.h exactly -- this decodes the
-    // rcModeActivationMask-derived flightModeFlags/flightModeFlags2 S-frame fields bit-for-bit,
-    // not the flightModeBits_e enum. 'UNUSED' entries are reserved boxIds kept only so later
-    // ids don't get renumbered (BOXHORIZON, BOXALTHOLD, BOXRESCUE, BOXPARALYZE, BOXCALIB,
-    // BOXOSD, BOXSTICKCOMMANDDISABLE, BOXGOVSUSPEND, BOXGOVBYPASS).
-    FLIGHT_LOG_FLIGHT_MODE_NAME_WF = makeReadOnly([
+    // Positions mirror boxId_e in gripora-firmware's src/main/fc/rc_modes.h exactly -- this
+    // decodes the rcModeActivationMask-derived flightModeFlags/flightModeFlags2 S-frame fields
+    // bit-for-bit, not the flightModeBits_e enum. 'UNUSED' entries are boxIds the firmware keeps
+    // reserved (removed aircraft modes: angle, horizon, trainer, attitude hold, rescue, GPS
+    // rescue/loiter/RTH, paralyze, calib, OSD, VTX, stick commands, governor, auto hover,
+    // manual, auto trim, thrust vector, traditional) so later ids don't get renumbered. The
+    // names of the live modes are the ones msp_box.c reports (GYRO OFF is BOXPASSTHROUGH).
+    FLIGHT_LOG_FLIGHT_MODE_NAME_GRIPORA = makeReadOnly([
         'ARM',
-        'ANGLE',
-        'UNUSED',
-        'TRAINER',
-        'ATTHOLD',
-        'UNUSED',
-        'UNUSED',
-        'GPSRESCUE',
-        'LOITER',
-        'RTH',
+        'UNUSED',           // ANGLE
+        'UNUSED',           // HORIZON
+        'UNUSED',           // TRAINER
+        'UNUSED',           // ATTHOLD
+        'UNUSED',           // ALTHOLD
+        'UNUSED',           // RESCUE
+        'UNUSED',           // GPSRESCUE
+        'UNUSED',           // LOITER
+        'UNUSED',           // RTH
         'FAILSAFE',
-        'PASSTHROUGH',
+        'GYRO OFF',         // BOXPASSTHROUGH
         'PREARM',
-        'UNUSED',
-        'BEEPERON',
-        'BEEPERMUTE',
+        'UNUSED',           // PARALYZE
+        'BEEPER',
+        'BEEPER MUTE',
         'LEDLOW',
-        'UNUSED',
-        'UNUSED',
+        'UNUSED',           // CALIB
+        'UNUSED',           // OSD
         'TELEMETRY',
-        'BEEPGPSCOUNT',
+        'GPS BEEP SATELLITE COUNT',
         'BLACKBOX',
-        'BLACKBOXERASE',
+        'BLACKBOX ERASE',
         'CAMERA1',
         'CAMERA2',
         'CAMERA3',
-        'VTXPITMODE',
-        'VTXCONTROLDISABLE',
-        'UNUSED',
-        'GOVERNOR',
-        'UNUSED',
-        'UNUSED',
+        'UNUSED',           // VTXPITMODE
+        'UNUSED',           // VTXCONTROLDISABLE
+        'UNUSED',           // STICKCOMMANDDISABLE
+        'UNUSED',           // GOVERNOR
+        'UNUSED',           // GOVSUSPEND
+        'UNUSED',           // GOVBYPASS
         'USER1',
         'USER2',
         'USER3',
         'USER4',
-        'AUTOHOVER',
-        'MANUAL',
-        'AUTOTRIM',
-        'THRUSTVECTOR',
-        'TVHOLD',
-        'TRADITIONAL',
+        'UNUSED',           // AUTOHOVER
+        'UNUSED',           // MANUAL
+        'UNUSED',           // AUTOTRIM
+        'UNUSED',           // THRUSTVECTOR
+        'UNUSED',           // TVHOLD
+        'UNUSED',           // TRADITIONAL
+        'DRIVE AIDS OFF',   // BOXDRIVEAIDSOFF
     ]),
 
     FLIGHT_LOG_FEATURES = [],
@@ -391,12 +387,9 @@ var
         'RPM_FILTER',
     ]),
 
-    // Same bit layout as FLIGHT_LOG_FEATURES_RF_4_3 -- gripora-firmware kept
-    // the old FEATURE_GOVERNOR bit reserved as FEATURE_UNUSED_26 rather than
-    // renumbering (src/main/config/feature.h), so this must stay positional.
-    // Bit 24 was also repurposed, from unused to FEATURE_THRUST_VECTOR, and is unused
-    // again since Thrust Vector became always available. The name stays for older logs.
-    FLIGHT_LOG_FEATURES_WF = makeReadOnly([
+    // Positions mirror features_e in gripora-firmware's src/main/config/feature.h. Retired bits
+    // (GPS, OSD, CMS, thrust vector, governor) stay as UNUSED<n> rather than being renumbered.
+    FLIGHT_LOG_FEATURES_GRIPORA = makeReadOnly([
         'RX_PPM',
         'UNUSED1',
         'UNUSED2',
@@ -404,9 +397,9 @@ var
         'UNUSED4',
         'UNUSED5',
         'SOFTSERIAL',
-        'GPS',
+        'UNUSED7',
         'UNUSED8',
-        'SONAR',
+        'UNUSED9',
         'TELEMETRY',
         'UNUSED11',
         'UNUSED12',
@@ -414,14 +407,14 @@ var
         'RX_MSP',
         'RSSI_ADC',
         'LED_STRIP',
-        'DISPLAY',
-        'OSD',
+        'DASHBOARD',
+        'UNUSED18',
         'UNUSED19',
         'UNUSED20',
         'UNUSED21',
         'UNUSED22',
         'UNUSED23',
-        'THRUST_VECTOR',
+        'UNUSED24',
         'RX_SPI',
         'UNUSED26',
         'ESC_SENSOR',
@@ -476,6 +469,22 @@ var
         "DISABLED",
     ]),
 
+    // motorPwmProtocolTypes_e in gripora-firmware's src/main/drivers/motor.h
+    FAST_PROTOCOL_GRIPORA = makeReadOnly([
+        "PWM",
+        "ONESHOT125",
+        "ONESHOT42",
+        "MULTISHOT",
+        "BRUSHED",
+        "DSHOT150",
+        "DSHOT300",
+        "DSHOT600",
+        "PROSHOT1000",
+        "CASTLE_LINK",
+        "SRXL2",
+        "DISABLED",
+    ]),
+
     MOTOR_SYNC = makeReadOnly([
         "SYNCED",
         "UNSYNCED"
@@ -500,7 +509,8 @@ var
         "Futaba S.BUS2",
         "FrSky FPORT2",
         "FrSky FBUS",
-        "JR XBUS Mode A"
+        "JR XBUS Mode A",
+        "Flysky IBUS2"
     ]),
 
     ANTI_GRAVITY_MODE = makeReadOnly([
@@ -864,20 +874,15 @@ var
         "USER4",
     ]),
 
-    // Positions mirror debugType_e in gripora-firmware's build/debug.h, not
-    // DEBUG_MODE_RF_4_6: the "Remove OSD" refactor deleted DEBUG_MAX7456_SIGNAL/
-    // SPICLOCK outright (no reserved placeholder), renumbering every slot from
-    // SBUS onward, and appended GYRO_CALIBRATION/AUTOHOVER/ATTHOLD/TVHOLD/GAIN_ATTEN/SNAP_RELAX/PROP_HANG at the
-    // end (there is no POLAR_RATE or USER1-4 debug mode in this firmware).
-    // Slots whose populating code is gone are UNUSED_<n> in the firmware too;
-    // they keep their positions so the modes after them keep their numbers.
-    // A few live labels differ from the firmware names (GYRO, RX_SPECTRUM_SPI)
-    // because they key DEBUG_FRIENDLY_FIELD_NAMES shared with Rotorflight.
-    DEBUG_MODE_WF = makeReadOnly([
+    // Names and positions mirror debugModeNames[] in gripora-firmware's src/main/build/debug.c
+    // exactly (debug_mode in the log header is an index into it). UNUSED_<n> slots are modes
+    // whose code was removed; the firmware keeps the slot so the modes after it keep their
+    // numbers.
+    DEBUG_MODE_GRIPORA = makeReadOnly([
         "NONE",
         "CYCLETIME",
         "BATTERY",
-        "GYRO",
+        "GYRO_FILTERED",
         "ACCELEROMETER",
         "PIDLOOP",
         "GYRO_SCALED",
@@ -908,27 +913,27 @@ var
         "CURRENT_SENSOR",
         "USB",
         "UNUSED_33",
-        "RTH",
+        "UNUSED_34",
         "ITERM_RELAX",
-        "ACRO_TRAINER",
+        "UNUSED_36",
         "SETPOINT",
         "RX_SIGNAL_LOSS",
         "RC_RAW",
         "RC_DATA",
         "DYN_LPF",
-        "RX_SPECTRUM_SPI",
+        "RX_SPEKTRUM_SPI",
         "DSHOT_RPM_TELEMETRY",
         "RPM_FILTER",
         "RPM_SOURCE",
         "UNUSED_46",
-        "AIRBORNE",
+        "UNUSED_47",
         "DUAL_GYRO_SCALED",
         "DSHOT_RPM_ERRORS",
         "CRSF_LINK_STATISTICS_UPLINK",
         "CRSF_LINK_STATISTICS_PWR",
         "CRSF_LINK_STATISTICS_DOWN",
         "BARO",
-        "GPS_RESCUE_THROTTLE_PID",
+        "UNUSED_54",
         "FREQ_SENSOR",
         "UNUSED_56",
         "UNUSED_57",
@@ -953,13 +958,15 @@ var
         "UNUSED_76",
         "UNUSED_77",
         "GYRO_CALIBRATION",
-        "AUTOHOVER",
-        "ATTHOLD",
-        "TVHOLD",
+        "UNUSED_79",
+        "UNUSED_80",
+        "UNUSED_81",
         "GAIN_ATTEN",
-        "SNAP_RELAX",
-        "PROP_HANG",
+        "UNUSED_83",
+        "UNUSED_84",
         "FBUS",
+        "DRIVE",
+        "DRIVE_AIDS",
     ]),
 
     SUPER_EXPO_YAW = makeReadOnly([
@@ -1024,7 +1031,9 @@ var
         "AK8963"
     ]),
 
-    FLIGHT_LOG_FLIGHT_STATE_NAME = makeReadOnly([
+    FLIGHT_LOG_FLIGHT_STATE_NAME = [],
+
+    FLIGHT_LOG_FLIGHT_STATE_NAME_BF = makeReadOnly([
         "GPS_FIX_HOME",
         "GPS_FIX",
         "CALIBRATE_MAG",
@@ -1035,13 +1044,15 @@ var
     // gripora-firmware's stateFlags_t (fc/runtime_config.h) trimmed the legacy 5-bit
     // enum down to 3 members and repurposed bit 2 for GPS_FIX_EVER instead of CALIBRATE_MAG --
     // reusing the BF/RF list above would mislabel it.
-    FLIGHT_LOG_FLIGHT_STATE_NAME_WF = makeReadOnly([
+    FLIGHT_LOG_FLIGHT_STATE_NAME_GRIPORA = makeReadOnly([
         "GPS_FIX_HOME",
         "GPS_FIX",
         "GPS_FIX_EVER",
     ]),
 
-    FLIGHT_LOG_FAILSAFE_PHASE_NAME = makeReadOnly([
+    FLIGHT_LOG_FAILSAFE_PHASE_NAME = [],
+
+    FLIGHT_LOG_FAILSAFE_PHASE_NAME_BF = makeReadOnly([
         "IDLE",
         "RX_LOSS_DETECTED",
         "LANDING",
@@ -1049,6 +1060,17 @@ var
         "RX_LOSS_MONITORING",
         "RX_LOSS_RECOVERED",
         "GPS_RESCUE",
+    ]),
+
+    // failsafePhase_e in gripora-firmware's src/main/flight/failsafe.h. 6 (GPS_RESCUE) is
+    // reserved; LANDING/LANDED keep their inherited names (stage 2: throttle at neutral, disarm).
+    FLIGHT_LOG_FAILSAFE_PHASE_NAME_GRIPORA = makeReadOnly([
+        "IDLE",
+        "RX_LOSS_DETECTED",
+        "LANDING",
+        "LANDED",
+        "RX_LOSS_MONITORING",
+        "RX_LOSS_RECOVERED",
     ]),
 
     FFT_CALC_STEPS = makeReadOnly([
@@ -1074,7 +1096,9 @@ var
         "AUTO",
     ]),
 
-    FLIGHT_LOG_DISARM_REASON = makeReadOnly([
+    FLIGHT_LOG_DISARM_REASON = [],
+
+    FLIGHT_LOG_DISARM_REASON_BF = makeReadOnly([
         "ARMING_DISABLED",
         "FAILSAFE",
         "THROTTLE_TIMEOUT",
@@ -1085,6 +1109,15 @@ var
         "GPS_RESCUE",
         "SERIAL_IO",
     ]),
+
+    // disarmReason_e in gripora-firmware's src/main/fc/core.h: 5-7 are reserved.
+    FLIGHT_LOG_DISARM_REASON_GRIPORA = makeReadOnly(Object.assign([
+        "ARMING_DISABLED",
+        "FAILSAFE",
+        "THROTTLE_TIMEOUT",
+        "STICKS",
+        "SWITCH",
+    ], { 8: "SERIAL_COMMAND", 255: "SYSTEM" })),
 
     FLIGHT_LOG_GOVSTATES = [],
 
@@ -1122,9 +1155,18 @@ var
         "EXIT",
     ]),
 
-    FLIGHT_LOG_AIRBORNE_STATES = makeReadOnly([
+    FLIGHT_LOG_AIRBORNE_STATES = [],
+
+    FLIGHT_LOG_AIRBORNE_STATES_BF = makeReadOnly([
         "LANDING",
         "TAKEOFF",
+    ]),
+
+    // Gripora logs its "car running" latch (INFLIGHT_MODE: armed and the throttle has left
+    // neutral, held until disarm) as the inherited airborne-state event.
+    FLIGHT_LOG_AIRBORNE_STATES_GRIPORA = makeReadOnly([
+        "STOPPED",
+        "RUNNING",
     ]),
 
     RATES_TYPE = makeReadOnly([
@@ -1163,6 +1205,12 @@ var
     ]);
 
 function adjustFieldDefsList(firmwareType, firmwareVersion) {
+
+    // Shared by every firmware except Gripora, which overrides them below
+    FLIGHT_LOG_FLIGHT_STATE_NAME = FLIGHT_LOG_FLIGHT_STATE_NAME_BF;
+    FLIGHT_LOG_FAILSAFE_PHASE_NAME = FLIGHT_LOG_FAILSAFE_PHASE_NAME_BF;
+    FLIGHT_LOG_DISARM_REASON = FLIGHT_LOG_DISARM_REASON_BF;
+    FLIGHT_LOG_AIRBORNE_STATES = FLIGHT_LOG_AIRBORNE_STATES_BF;
 
     if(firmwareType == FIRMWARE_TYPE_ROTORFLIGHT) {
 
@@ -1219,12 +1267,16 @@ function adjustFieldDefsList(firmwareType, firmwareVersion) {
 
         // Gripora is a fresh fork with no version history of its own yet, so
         // unlike Rotorflight above there's just one (current) field-def set --
-        // no per-version branching needed.
-        FLIGHT_LOG_FLIGHT_MODE_NAME = makeReadOnly(FLIGHT_LOG_FLIGHT_MODE_NAME_WF.slice());
-        FLIGHT_LOG_FEATURES = makeReadOnly(FLIGHT_LOG_FEATURES_WF.slice());
-        FLIGHT_LOG_FLIGHT_STATE_NAME = makeReadOnly(FLIGHT_LOG_FLIGHT_STATE_NAME_WF.slice());
-        DEBUG_MODE = makeReadOnly(DEBUG_MODE_WF.slice());
-        FAST_PROTOCOL = FAST_PROTOCOL_RF_4_5.slice();
+        // no per-version branching needed. The firmware version is not used: it
+        // is not a Rotorflight/Betaflight version to compare against.
+        FLIGHT_LOG_FLIGHT_MODE_NAME = FLIGHT_LOG_FLIGHT_MODE_NAME_GRIPORA;
+        FLIGHT_LOG_FEATURES = FLIGHT_LOG_FEATURES_GRIPORA;
+        FLIGHT_LOG_FLIGHT_STATE_NAME = FLIGHT_LOG_FLIGHT_STATE_NAME_GRIPORA;
+        FLIGHT_LOG_FAILSAFE_PHASE_NAME = FLIGHT_LOG_FAILSAFE_PHASE_NAME_GRIPORA;
+        FLIGHT_LOG_DISARM_REASON = FLIGHT_LOG_DISARM_REASON_GRIPORA;
+        FLIGHT_LOG_AIRBORNE_STATES = FLIGHT_LOG_AIRBORNE_STATES_GRIPORA;
+        DEBUG_MODE = DEBUG_MODE_GRIPORA;
+        FAST_PROTOCOL = FAST_PROTOCOL_GRIPORA;
         // No governor, no rescue -- FLIGHT_LOG_GOVSTATES/FLIGHT_LOG_RESCUE_STATES
         // are left unset since those events are never emitted by this firmware.
 

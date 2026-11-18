@@ -16,15 +16,11 @@ function FlightAnalysisDialog(dialog) {
     var STATUS_LABEL = { good: "Looks good", watch: "Worth watching", attention: "Needs attention", info: "Findings" };
 
     var LAB_ORDER = [
-        { key: "governor", title: "Motor Speed / Governor" },
-        { key: "idleChop", title: "Idle Chop Recovery" },
         { key: "esc", title: "Power / ESC" },
         { key: "battery", title: "Battery" },
         { key: "vibration", title: "Vibration" },
-        { key: "thrustVector", title: "Thrust Vector" },
         { key: "pid", title: "PID Tracking" },
-        { key: "bounce", title: "Bounce-Back" },
-        { key: "gyroOff", title: "MANUAL Response" }
+        { key: "bounce", title: "Bounce-Back" }
     ];
 
     function escapeHtml(text) {
@@ -46,12 +42,12 @@ function FlightAnalysisDialog(dialog) {
             '<div class="flight-analysis-context">' +
                 '<span><strong>' + escapeHtml(ctx.craftName) + '</strong></span>' +
                 (ctx.firmwareVersion ? '<span>Firmware ' + escapeHtml(ctx.firmwareVersion) + '</span>' : "") +
-                '<span>Flight length ' + formatSeconds(ctx.durationSeconds) + '</span>' +
-                '<span>' + formatSeconds(ctx.stableSeconds) + ' identified as steady flight</span>' +
+                '<span>Log length ' + formatSeconds(ctx.durationSeconds) + '</span>' +
+                '<span>' + formatSeconds(ctx.stableSeconds) + ' identified as steady running</span>' +
             '</div>' +
             (ctx.capped
-                ? '<p class="flight-analysis-capped-note">This flight is long enough that analyzing all of it would take several minutes ' +
-                  'to decode, so this covers the steadiest ' + formatSeconds(ctx.analyzedSeconds) + ' found rather than the whole flight.</p>'
+                ? '<p class="flight-analysis-capped-note">This log is long enough that analyzing all of it would take several minutes ' +
+                  'to decode, so this covers the steadiest ' + formatSeconds(ctx.analyzedSeconds) + ' found rather than the whole log.</p>'
                 : "")
         );
     }
@@ -127,7 +123,7 @@ function FlightAnalysisDialog(dialog) {
         var range = [flightLog.getMinTime(), flightLog.getMaxTime()];
 
         if (flightLog !== lastLog || !lastRange || range[0] !== lastRange[0] || range[1] !== lastRange[1]) {
-            body.html('<p class="flight-analysis-loading">Analyzing flight&hellip;</p>');
+            body.html('<p class="flight-analysis-loading">Analyzing run&hellip;</p>');
 
             // Give the modal a frame to paint the loading message before the
             // (synchronous) analysis runs.

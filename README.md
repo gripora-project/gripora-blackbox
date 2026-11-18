@@ -7,25 +7,26 @@
 
 # Gripora Blackbox Explorer
 
-The Blackbox Explorer opens the flight logs a [Gripora](https://github.com/gripora-project/gripora-firmware)
-flight controller records, and plots them: gyro against setpoint, servo and motor outputs, flight
-modes, battery and anything else that was logged. Gripora is open-source flight controller
-firmware for fixed-wing aircraft.
+The Blackbox Explorer opens the logs a [Gripora](https://github.com/gripora-project/gripora-firmware)
+controller records, and plots them: steering gyro against setpoint, throttle and brake, servo and
+motor outputs, modes, drive aids, battery and anything else that was logged. Gripora is
+open-source stability-control firmware for RC cars: steering stabilisation, ABS and traction
+control.
 
 **[Open in the browser](https://blackbox.gripora.org)** ·
 **[Desktop downloads](https://github.com/gripora-project/gripora-blackbox/releases)** ·
 **[Documentation](https://doc.gripora.org)**
 
-![A flight log in the Blackbox Explorer](https://raw.githubusercontent.com/gripora-project/gripora-docs/main/docs/assets/images/blackbox-viewer.png)
+![A log in the Blackbox Explorer](https://raw.githubusercontent.com/gripora-project/gripora-docs/main/docs/assets/images/blackbox-viewer.png)
 
 
 ## Features
 
 * Graphs of any logged field, with a legend showing the value under the cursor
-* A 3D model of the aircraft's attitude and a stick overlay
+* A 3D attitude view and a stick overlay
 * A spectrum analyser for finding vibration and tuning filters
-* Step-response plots for judging a PID tune
-* Flight video alongside the log, and export of the log drawn over the video
+* Step-response plots for judging a steering tune
+* Video of the run alongside the log, and export of the log drawn over the video
 * Export to CSV
 * Saved workspaces for the graph layouts you use most
 
@@ -42,8 +43,7 @@ The desktop app needs Windows 10 or later, macOS or Linux.
 
 ## Usage
 
-Click **Open** at the top right and select your log file, and your flight video if you recorded
-one.
+Click **Open** at the top right and select your log file, and your video if you recorded one.
 
 Scroll through the log by clicking or dragging on the seek bar under the main graph. The vertical
 red bar in the center of the graph is the current time. You can also drag left and right on the
@@ -52,23 +52,23 @@ graph to scrub backwards and forwards.
 ### Customizing the graph display
 
 Click **Graph setup** on the right to choose which fields are plotted. You may, for example, want
-to remove the default gyro plot and add a plot for each rotation axis, or plot battery voltage
-against throttle to see how your battery performs.
+to add the steering PID terms, or plot battery voltage against throttle to see how your battery
+performs.
 
-### Syncing your log to your flight video
+### Syncing your log to your video
 
-The flight controller plays a short beep when arming, which is the start of the logged data. Sync
+The controller plays a short beep when arming, which is the start of the logged data. Sync
 the log to the video by pressing "start log here" when you hear the beep in the video. Fine-tune
 the alignment with the nudge left and nudge right buttons, or by editing the "log sync" value.
 Positive values move the log toward the end of the video, negative values toward the beginning.
 
-### Flight video won't load, or jumps in an exported video
+### Video won't load, or jumps in an exported video
 
 Some video formats aren't supported by Chrome, so the viewer can't open them. Re-encode the video
 with the free tool [Handbrake][]: choose MP4 as the format and H.264 as the video codec.
 
 Because of [Google Bug #66631][], Chrome can't seek accurately in H.264 videos that use B-frames.
-This is mostly fine when viewing, but in an exported video the flight video occasionally jumps
+This is mostly fine when viewing, but in an exported video the background video occasionally jumps
 back a couple of frames. To avoid it, have Handbrake render every frame as an intraframe by adding
 `keyint=1` to the Additional Options box.
 
@@ -91,9 +91,10 @@ Gripora is a community project. You can help by:
 
 Gripora is open source and free of charge, with no warranty.
 
-The Blackbox Explorer is a fork of the [Rotorflight](https://github.com/rotorflight) Blackbox
-Explorer, which is a fork of the [Betaflight](https://github.com/betaflight) Blackbox Explorer,
-which is a fork of the [Cleanflight](https://github.com/cleanflight) one. Thank you to everyone who
+The Blackbox Explorer is a fork of the [WingFlight](https://github.com/WingFlight) Blackbox
+Explorer, which is a fork of the [Rotorflight](https://github.com/rotorflight) one, itself a fork
+of the [Betaflight](https://github.com/betaflight) Blackbox Explorer, which is a fork of the
+[Cleanflight](https://github.com/cleanflight) one. Thank you to everyone who
 contributed along the way.
 
 

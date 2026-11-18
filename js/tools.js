@@ -441,14 +441,18 @@ function firmwareGreaterOrEqual(sysConfig, bf_version, cf_version) {
      *
      * returns              True when firmware version is higher or equal to requested version
      *                      False when firmware version is lower than the requested version
+     *
+     * Gripora always counts as current: its own version numbers (0.0.x releases) are not
+     * comparable with the Betaflight/Rotorflight versions these checks are written against.
      ***/
+    if (sysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA) {
+        return true;
+    }
     if (cf_version === undefined) {
         return (sysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT && semver.gte(sysConfig.firmwareVersion, bf_version)) ||
-               (sysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA  && semver.gte(sysConfig.firmwareVersion, bf_version)) ||
                (sysConfig.firmwareType == FIRMWARE_TYPE_BETAFLIGHT  && semver.gte(sysConfig.firmwareVersion, bf_version));
     } else {
         return (sysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT && semver.gte(sysConfig.firmwareVersion, bf_version)) ||
-               (sysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA  && semver.gte(sysConfig.firmwareVersion, bf_version)) ||
                (sysConfig.firmwareType == FIRMWARE_TYPE_BETAFLIGHT  && semver.gte(sysConfig.firmwareVersion, bf_version)) ||
                (sysConfig.firmwareType == FIRMWARE_TYPE_CLEANFLIGHT && semver.gte(sysConfig.firmwareVersion, cf_version));
     }

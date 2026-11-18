@@ -243,8 +243,8 @@ function BlackboxLogViewer() {
 
             }
 
-            // Update flight mode flags on status bar. Combine flightModeFlags with
-            // flightModeFlags2 (boxId 32-63, e.g. AUTOHOVER/MANUAL/THRUSTVECTOR/TVHOLD) so modes
+            // Update mode flags on status bar. Combine flightModeFlags with
+            // flightModeFlags2 (boxId 32-63, e.g. DRIVE AIDS OFF) so modes
             // that only live in the second word still show up here -- see blackbox.c's
             // slowHistory.flightModeFlags2 comment for why the S-frame pair is the source of truth.
             $(".flight-mode", statusBar).text(
@@ -439,7 +439,7 @@ function BlackboxLogViewer() {
         $('.lograte', statusBar).text( ((sysConfig['frameIntervalPDenom']!=null && sysConfig['frameIntervalPNum']!=null)?( 'Sample Rate : ' + sysConfig['frameIntervalPNum'] +'/' + sysConfig['frameIntervalPDenom']):''));
 
         seekBar.setTimeRange(flightLog.getMinTime(), flightLog.getMaxTime(), currentBlackboxTime);
-        seekBar.setActivityRange(0, 1000); // throttle command range
+        seekBar.setActivityRange(0, 1000); // throttle command magnitude (signed on Gripora, see flightlog_index.js)
 
         var
             activity = flightLog.getActivitySummary();
@@ -629,7 +629,8 @@ function BlackboxLogViewer() {
         setVideoOutTime(false);
 
         if (graphConfigNeedsExample) {
-            graphConfig = GraphConfig.getExampleGraphConfigs(flightLog, ["Motors", "Gyros"]);
+            graphConfig = GraphConfig.getExampleGraphConfigs(flightLog,
+                flightLog.getSysConfig().firmwareType === FIRMWARE_TYPE_GRIPORA ? ["Steering", "Throttle"] : ["Motors", "Gyros"]);
             graphConfigNeedsExample = false;
         }
 

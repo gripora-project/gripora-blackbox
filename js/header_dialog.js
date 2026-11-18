@@ -317,11 +317,15 @@ function HeaderDialog(dialog, onSave) {
                   curve: sysConfig.tv_gain_curve, scaled: [true, true, true, true, false] },
             ];
             var axes = ['Roll', 'Pitch', 'Yaw'];
+            // Gripora stabilises only yaw, as the steering loop; roll and pitch always hold zero
+            var car = sysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA;
+            if (car) axes = [null, null, 'Steering'];
             var elem = '';
 
             loops.forEach(function(loop) {
                 if (!Array.isArray(loop.master)) return;
                 axes.forEach(function(axisName, axis) {
+                    if (!axisName) return;
                     var pid = sysConfig[loop.pids[axis]];
                     if (!Array.isArray(pid)) return;
                     var curveIndex = Array.isArray(loop.curve) ? loop.curve[axis] : 0;
@@ -343,6 +347,51 @@ function HeaderDialog(dialog, onSave) {
 
             $('.gain_scaling table tbody').empty().append(elem);
             $('.gain_scaling').toggle(elem !== '');
+        }
+
+        // Gripora fw_tpa, fw_spa, drive_abs and drive_tc headers (the PID profile in use),
+        // as written by the firmware's blackbox.c and documented in its Changes.md.
+        function renderDriveSettings(sysConfig) {
+            var rows = [];
+            var curveText = function(curve) { return curve > 0 ? 'Curve ' + curve : 'None'; };
+            var msText = function(ms) { return ms > 0 ? ms + ' ms' : 'Off'; };
+            var tpa = sysConfig.fw_tpa, spa = sysConfig.fw_spa;
+            var abs = sysConfig.drive_abs, tc = sysConfig.drive_tc;
+
+            if (Array.isArray(tpa)) {
+                rows.push(['Throttle attenuation (TPA)', tpa[0] + '%, ' + curveText(tpa[1])]);
+            }
+            if (Array.isArray(spa)) {
+                rows.push(['Speed attenuation (SPA)', spa[0] + '%, ' + curveText(spa[1]) +
+                    (spa[2] != null ? ', top speed ' + spa[2] + ' km/h' : '')]);
+            }
+            if (Array.isArray(abs)) {
+                var absMode = ['OFF', 'STATIC', 'DYNAMIC'][abs[0]] ?? abs[0];
+                rows.push(['ABS', absMode]);
+                if (abs[0]) {
+                    rows.push(['ABS pulse rate', abs[1] + ' Hz']);
+                    rows.push(['ABS release floor', abs[2] + '%']);
+                    rows.push(['ABS hold', abs[3] + ' ms']);
+                    rows.push(['ABS trigger', abs[4] + '% brake']);
+                    if (abs[0] == 2) {
+                        rows.push(['ABS rate at full brake', abs[5] + ' Hz']);
+                        rows.push(['ABS hold at full brake', msText(abs[6])]);
+                    }
+                    rows.push(['ABS rate added at full lock', abs[7] > 0 ? abs[7] + ' Hz' : 'Off']);
+                    rows.push(['ABS hold at full lock', msText(abs[8])]);
+                }
+            }
+            if (Array.isArray(tc)) {
+                var tcMode = ['OFF', 'RAMP'][tc[0]] ?? tc[0];
+                rows.push(['Traction control', tcMode + (tc[0] ? ', 0 to full in ' + tc[1] + ' ms' : '')]);
+            }
+
+            var elem = rows.map(function(row) {
+                return '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td></tr>';
+            }).join('');
+
+            $('.drive_settings table tbody').empty().append(elem);
+            $('.drive_settings').toggle(elem !== '');
         }
 
         function _isFeatureEnabled(name, list, value) {
@@ -376,6 +425,11 @@ function HeaderDialog(dialog, onSave) {
                 {bit: 29, group: 'other', name: 'DYN_NOTCH', description: 'Dynamic gyro notch filtering'},
                 {bit: 30, group: 'other', name: 'RPM_FILTER', description: 'RPM Filtering'},
         ];
+
+        if (sysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA) {
+            features = features.filter(function(f) { return f.bit != 7 && f.bit != 18 && f.bit != 19; });
+            features.push({bit: 17, group: 'other', name: 'DASHBOARD', description: 'Dashboard display'});
+        }
 
         var radioGroups = [];
 
@@ -467,7 +521,7 @@ function HeaderDialog(dialog, onSave) {
             {name: 'Battery', description: 'Battery voltage and current'},
             {name: 'RSSI', description: 'Receiver Signal Quality'},
             {name: 'GPS', description: 'All GPS-related values'},
-            {name: 'RPM', description: 'Rotor Speeds'},
+            {name: 'RPM', description: 'Motor Speeds'},
             {name: 'Motors', description: 'Motor throttle values'},
             {name: 'Servos', description: 'Servo positions'},
             {name: 'VBEC', description: 'BEC Voltage'},
@@ -475,7 +529,7 @@ function HeaderDialog(dialog, onSave) {
             {name: 'Temperatures', description: 'Temperatures'},
         ];
 
-        if((sysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT || sysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA) && semver.gte(sysConfig.firmwareVersion, '4.4.0')) {
+        if(sysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA || (sysConfig.firmwareType == FIRMWARE_TYPE_ROTORFLIGHT && semver.gte(sysConfig.firmwareVersion, '4.4.0'))) {
             fields = [...fields, ...[
                 {name: 'ESC', description: 'ESC Telemetry'},
                 {name: 'BEC', description: 'BEC Telemetry'},
@@ -767,6 +821,13 @@ function HeaderDialog(dialog, onSave) {
         populatePID('pitchPID'                                        , sysConfig.pitchPID);
         populatePID('yawPID'                                        , sysConfig.yawPID);
         populatePID('govPID'                                        , sysConfig.govPID);
+        $('#pid_gov_header, #pid_gov').toggle(sysConfig.govPID[0] != null);
+
+        // Gripora stabilises only yaw, as the steering loop: roll and pitch always hold zero
+        var car = (sysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA);
+        $('.pid_tuning .rollPID, .pid_tuning .pitchPID').toggle(!car);
+        $('.pid_tuning .yawPID td:first').text(car ? 'Steering' : 'Yaw');
+        renderDriveSettings(sysConfig);
 
         // Gripora thrust vector loop, only in logs that carry its tune
         $('#pid_tv_header, #pid_tv').toggle(Array.isArray(sysConfig.tvRollPID));
@@ -776,7 +837,7 @@ function HeaderDialog(dialog, onSave) {
         renderGainScaling(sysConfig);
 
         // Removed since GPS Rescue
-        if (semver.lt(sysConfig.firmwareVersion, "3.4.0")) {
+        if (sysConfig.firmwareType != FIRMWARE_TYPE_GRIPORA && semver.lt(sysConfig.firmwareVersion, "3.4.0")) {
             populatePID('altPID'                , sysConfig.altPID);
             populatePID('velPID'                , sysConfig.velPID);
             populatePID('magPID'                , sysConfig.magPID); // this is not an array
@@ -793,6 +854,7 @@ function HeaderDialog(dialog, onSave) {
         }
 
         populatePID('levelPID'                  , sysConfig.levelPID);
+        $('#pid_accel_header, #pid_accel').toggle(sysConfig.levelPID[0] != null);   // no angle mode on Gripora
         populatePID('rollBW'                    , sysConfig.rollBW);
         populatePID('pitchBW'                   , sysConfig.pitchBW);
         populatePID('yawBW'                     , sysConfig.yawBW);
@@ -1033,6 +1095,9 @@ function HeaderDialog(dialog, onSave) {
 
         setParameter('error_decay_ground'         , sysConfig.error_decay_ground, 1);
 
+        // Helicopter main/tail rotor settings: never in a Gripora log
+        $('.gui_box.tail').toggle(sysConfig.firmwareType != FIRMWARE_TYPE_GRIPORA);
+
         renderSelect('unsynced_fast_pwm'                ,sysConfig.unsynced_fast_pwm, MOTOR_SYNC);
         renderSelect('fast_pwm_protocol'                ,sysConfig.fast_pwm_protocol, FAST_PROTOCOL);
         setParameter('motor_pwm_rate'                    ,sysConfig.motor_pwm_rate,0);
@@ -1169,7 +1234,7 @@ function HeaderDialog(dialog, onSave) {
         setCheckbox('rc_smoothing'                         , sysConfig.rc_smoothing);
         setCheckbox('piro_compensation'                    , sysConfig.piro_compensation);
 
-        if (semver.gte(activeSysConfig.firmwareVersion, '4.6.0')) {
+        if (activeSysConfig.firmwareType == FIRMWARE_TYPE_GRIPORA || semver.gte(activeSysConfig.firmwareVersion, '4.6.0')) {
             $('[name="piro_compensation"]').closest('table').hide();
         }
 

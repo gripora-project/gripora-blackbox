@@ -357,10 +357,12 @@ StepResponsePlot._drawAxisResponse = function (
 // One line along the bottom listing the windows left out of each visible axis and why,
 // so a curve built from a fraction of the flight says so.
 StepResponsePlot._drawExclusions = function (canvasCtx, WIDTH, HEIGHT) {
+  // Gripora (car) logs: "not flying" means the car wasn't turning, and only failsafe counts as leveling
+  const car = this._sysConfig && this._sysConfig.firmwareType === FIRMWARE_TYPE_GRIPORA;
   const REASONS = [
-    ["notFlying", "not flying"],
+    ["notFlying", car ? "not turning" : "not flying"],
     ["bypass", "gyro off/setup"],
-    ["leveling", "leveling mode"],
+    ["leveling", car ? "failsafe" : "leveling mode"],
     ["snap", "snap/saturated"],
   ];
   const axes = Object.keys(STEP_RESPONSE_AXIS_LABELS).filter(
