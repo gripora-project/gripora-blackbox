@@ -5,6 +5,13 @@
       "name": "master",
       "path": "./master/",
       "notes": "Latest development build"
+    },
+    {
+      "type": "branch",
+      "name": "feature-car-model",
+      "path": "./feature-car-model/",
+      "branch": "feature/car-model",
+      "date": "2026-11-18T10:26:10Z"
     }
   ]
 }
