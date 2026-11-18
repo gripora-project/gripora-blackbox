@@ -94,13 +94,9 @@ const APP_ASSET_SOURCES = [
     './js/vendor/semver.js',
     './js/vendor/three.js',
     './js/vendor/three.min.js',
-    './js/vendor/GLTFLoader.js',
     './js/save_file.js',
     './js/screenshot.js',
     './js/default_workspaces.js',
-
-    './resources/models/model.gltf',
-    './resources/models/model.bin',
 
     // everything else
     './*.html',
